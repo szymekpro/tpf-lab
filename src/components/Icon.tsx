@@ -19,6 +19,9 @@ const paths = {
   plus:      'M12 5v14M5 12h14',
   bell:      'M6 8a6 6 0 1 1 12 0v5l2 3H4l2-3V8Zm4 11a2 2 0 0 0 4 0',
   search:    'M11 4a7 7 0 1 1 0 14 7 7 0 0 1 0-14Zm10 17-5.2-5.2',
+  settings:  'M4 7h16M10 7v4M4 17h16M14 17v-4',
+  edit:      'M4 20h4l10-10-4-4L4 16v4Zm9-11 4 4',
+  logout:    'M5 4h8a2 2 0 0 1 2 2v4M13 14v4a2 2 0 0 1-2 2H5M21 12h-9M16 8l-4 4 4 4',
 } as const;
 
 export type IconName = keyof typeof paths;
@@ -32,6 +35,7 @@ type Props = Omit<SVGProps<SVGSVGElement>, 'name'> & {
 
 const STROKE_ICONS: ReadonlySet<IconName> = new Set([
   'arrowRight', 'trend', 'signal', 'fork', 'plus', 'bell', 'search',
+  'settings', 'edit', 'logout',
 ]);
 
 export function Icon({ name, size = 20, variant, ...rest }: Props) {

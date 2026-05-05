@@ -1,0 +1,235 @@
+.account {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  padding: var(--sp-5);
+  padding-bottom: calc(72px + var(--sp-6));
+}
+
+.account__header h1 {
+  font-size: var(--fs-h1);
+  font-weight: 800;
+  margin: 0;
+}
+
+.account__profile {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+
+.account__avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--r-pill);
+  background: var(--color-primary-500);
+  color: var(--text-inverse);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-headline);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.account__identity {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.account__name {
+  font-size: var(--fs-body);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.account__email {
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}
+
+.account__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.account__sectionTitle {
+  font-family: var(--font-headline);
+  font-size: var(--fs-small);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.account__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-3);
+}
+
+.account__statCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.account__statLabel {
+  font-family: var(--font-headline);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.account__statValue {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.account__statMain {
+  font-family: var(--font-headline);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.account__statUnit {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.account__statHint {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.account__target {
+  display: flex;
+  flex-direction: column;
+}
+
+.account__targetValue {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.account__iconButton {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-pill);
+  border: 0;
+  background: var(--color-neutral-100);
+  color: var(--color-primary-500);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+
+.account__iconButton:hover {
+  background: var(--color-primary-50);
+}
+
+.account__list {
+  display: flex;
+  flex-direction: column;
+}
+
+.account__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-4) var(--sp-5);
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+}
+
+.account__row:first-child {
+  border-top: 0;
+}
+
+.account__rowButton {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.account__rowButton:hover {
+  background: var(--color-neutral-50);
+}
+
+.account__rowIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-md);
+  background: var(--color-primary-50);
+  color: var(--color-primary-500);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.account__rowText {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.account__rowTitle {
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.account__rowChevron {
+  color: var(--text-muted);
+}
+
+.account__segmented {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px;
+  background: var(--color-neutral-100);
+  border-radius: var(--r-pill);
+}
+
+.account__segment {
+  border: 0;
+  background: transparent;
+  border-radius: var(--r-pill);
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.account__segment--active {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.account__logoutButton {
+  background: rgba(211, 47, 47, 0.12);
+  border-color: rgba(211, 47, 47, 0.2);
+  color: var(--color-danger-500);
+}
+
+.account__logoutButton:hover {
+  background: rgba(211, 47, 47, 0.2);
+}

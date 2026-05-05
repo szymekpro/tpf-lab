@@ -4,6 +4,7 @@
  * (sygnatury są zamierzone takie, jak realne endpointy).
  */
 import type {
+  AccountProfile,
   DashboardStats,
   GlycemiaPoint,
   GlycemiaSnapshot,
@@ -17,7 +18,21 @@ const delay = (ms = 300) => new Promise(res => setTimeout(res, ms));
 const MOCK_USER: User = {
   id: 'u_1',
   firstName: 'Anna',
-  email: 'anna@diabetcare.app',
+  lastName: 'Kowalska',
+  email: 'anna.kowalska@example.com',
+};
+
+const MOCK_ACCOUNT: AccountProfile = {
+  user: MOCK_USER,
+  clinical: {
+    icr: '1:10',
+    isf: 40,
+    targetMin: 70,
+    targetMax: 180,
+  },
+  preferences: {
+    unit: 'mg/dL',
+  },
 };
 
 export async function login(email: string, password: string): Promise<User> {
@@ -26,6 +41,16 @@ export async function login(email: string, password: string): Promise<User> {
     throw new Error('Nieprawidłowy e-mail lub hasło.');
   }
   return MOCK_USER;
+}
+
+export async function getCurrentUser(): Promise<User> {
+  await delay(300);
+  return MOCK_USER;
+}
+
+export async function getAccountProfile(): Promise<AccountProfile> {
+  await delay(280);
+  return MOCK_ACCOUNT;
 }
 
 /* =================== DASHBOARD =================== */
