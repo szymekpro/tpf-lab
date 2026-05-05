@@ -1,0 +1,65 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  width: 100%;
+}
+
+.field__label {
+  font-family: var(--font-headline);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.field__control {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.field__input {
+  flex: 1;
+  height: 48px;
+  padding: 0 var(--sp-4);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  border-radius: var(--r-md);
+  outline: none;
+  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.field__input::placeholder { color: var(--text-muted); }
+.field__input:focus {
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px var(--color-primary-50);
+}
+
+.field--error .field__input {
+  border-color: var(--color-danger-500);
+}
+.field--error .field__input:focus {
+  box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.12);
+}
+
+.field__adornment {
+  position: absolute;
+  right: var(--sp-3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  color: var(--text-muted);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+.field__adornment:hover { color: var(--text-secondary); }
+.field__adornment--static { cursor: default; pointer-events: none; }
+
+/* Pad input on the right to leave room for the adornment */
+.field__control:has(.field__adornment) .field__input { padding-right: 44px; }
+
+.field__error {
+  font-size: var(--fs-small);
+  color: var(--color-danger-500);
+}

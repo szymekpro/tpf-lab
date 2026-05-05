@@ -1,0 +1,52 @@
+.glycemiaHero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.glycemiaHero__valueRow {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+}
+
+.glycemiaHero__value {
+  font-family: var(--font-headline);
+  font-size: 64px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.glycemiaHero__unitCol {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.glycemiaHero__unit {
+  font-size: var(--fs-small);
+  opacity: 0.85;
+}
+
+.glycemiaHero__trend {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.glycemiaHero__status {
+  font-size: var(--fs-body);
+  opacity: 0.92;
+}
+
+.glycemiaHero__sensor {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  align-self: flex-start;
+  background: rgba(255,255,255,0.16);
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: var(--r-pill);
+  padding: 6px 12px;
+  font-size: var(--fs-small);
+}

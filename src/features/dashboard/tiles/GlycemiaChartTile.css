@@ -1,0 +1,16 @@
+.chart {
+  width: 100%;
+}
+
+.chart__svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.chart__yLabel,
+.chart__xLabel {
+  font-family: var(--font-body);
+  font-size: 11px;
+  fill: var(--text-muted);
+}

@@ -1,0 +1,46 @@
+.card {
+  border-radius: var(--r-lg);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-subtle);
+  overflow: hidden;
+}
+.card--padded { padding: var(--sp-5); }
+
+.card--surface  { background: var(--bg-surface);    color: var(--text-primary); }
+.card--muted    { background: var(--color-neutral-100); color: var(--text-primary); border-color: transparent; }
+.card--primary  {
+  background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-700));
+  color: var(--text-inverse);
+  border-color: transparent;
+  box-shadow: var(--shadow-md);
+}
+.card--tertiary {
+  background: linear-gradient(135deg, var(--color-tertiary-500), var(--color-tertiary-700));
+  color: var(--text-inverse);
+  border-color: transparent;
+  box-shadow: var(--shadow-md);
+}
+.card--inverted {
+  background: var(--color-neutral-900);
+  color: var(--text-inverse);
+  border-color: transparent;
+}
+
+.card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+.card__title {
+  font-family: var(--font-headline);
+  font-size: var(--fs-small);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+.card--surface .card__title,
+.card--muted .card__title { color: var(--text-secondary); }
