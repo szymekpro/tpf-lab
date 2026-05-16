@@ -1,7 +1,7 @@
 import type { ComponentType } from 'react';
 import type { User } from '../../../mocks';
 
-export type DetailRoute = 'sensor';
+export type DetailRoute = 'sensor' | 'edit-target' | 'privacy';
 
 /**
  * Kontekst, który DashboardView przekazuje do każdego kafelka.

@@ -1,0 +1,281 @@
+.privacyView {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  background: var(--bg-app);
+}
+
+/* Header */
+.privacyView__header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: 0 var(--sp-5);
+  height: 64px;
+  background: var(--bg-app);
+  border-bottom: 1px solid var(--border-subtle);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.privacyView__back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-pill);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: var(--color-primary-500);
+  padding: var(--sp-2);
+  margin-left: -8px;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+.privacyView__back:hover { background: var(--color-primary-50); }
+
+.privacyView__title {
+  font-family: var(--font-body);
+  font-size: var(--fs-h3);
+  font-weight: 400;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* Body */
+.privacyView__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  padding: var(--sp-5) var(--sp-5) calc(80px + var(--sp-6));
+}
+
+/* Hero */
+.privacyHero {
+  position: relative;
+  height: 160px;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(8, 126, 139, 0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+}
+
+.privacyHero__gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(8, 126, 139, 0.92), rgba(0, 99, 110, 0.7));
+  z-index: 0;
+}
+
+.privacyHero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 30% 50%, rgba(255,255,255,0.06) 0%, transparent 60%),
+    radial-gradient(circle at 70% 30%, rgba(255,255,255,0.04) 0%, transparent 50%);
+  z-index: 1;
+}
+
+.privacyHero__iconWrap {
+  position: relative;
+  z-index: 2;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.privacyHero__label {
+  position: absolute;
+  bottom: var(--sp-4);
+  left: var(--sp-4);
+  z-index: 2;
+  font-size: var(--fs-body);
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+}
+
+/* Options list */
+.privacyList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.privacyList__item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  background: var(--bg-surface);
+  border: 0;
+  border-radius: var(--r-md);
+  padding: var(--sp-4);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  box-shadow: 0 4px 6px rgba(8, 126, 139, 0.08);
+  transition: background var(--dur-fast) var(--ease-out);
+}
+.privacyList__item:hover { background: var(--color-neutral-50); }
+
+.privacyList__iconBox {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-sm);
+  background: #cbe7f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary-600);
+  flex-shrink: 0;
+}
+
+.privacyList__text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.privacyList__title {
+  font-size: var(--fs-body);
+  font-weight: 400;
+  color: #1e293b;
+  line-height: 1.5;
+}
+
+.privacyList__subtitle {
+  font-size: 14px;
+  color: #64748b;
+  line-height: 1.5;
+}
+.privacyList__subtitle--accent {
+  color: var(--color-primary-500);
+  font-weight: 600;
+}
+
+.privacyList__chevron {
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+/* Delete account */
+.privacyDelete {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  background: rgba(255, 218, 214, 0.2);
+  border: 1px solid rgba(186, 26, 26, 0.1);
+  border-radius: var(--r-md);
+  padding: var(--sp-4);
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+.privacyDelete:hover { background: rgba(255, 218, 214, 0.35); }
+
+.privacyDelete--confirm {
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--sp-4);
+  cursor: default;
+}
+.privacyDelete--confirm:hover { background: rgba(255, 218, 214, 0.2); }
+
+.privacyDelete__iconBox {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-sm);
+  background: #ffdad6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ba1a1a;
+  flex-shrink: 0;
+}
+
+.privacyDelete__title {
+  font-size: var(--fs-body);
+  font-weight: 400;
+  color: #ba1a1a;
+  line-height: 1.5;
+  display: block;
+}
+
+.privacyDelete__subtitle {
+  font-size: 14px;
+  color: rgba(186, 26, 26, 0.7);
+  line-height: 1.5;
+  display: block;
+}
+
+.privacyDelete__chevron { color: #ba1a1a; }
+
+.privacyDelete__confirmText {
+  font-size: var(--fs-small);
+  color: #ba1a1a;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.privacyDelete__confirmActions {
+  display: flex;
+  gap: var(--sp-3);
+}
+
+.privacyDelete__cancel,
+.privacyDelete__confirm {
+  flex: 1;
+  height: 36px;
+  border: 0;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.privacyDelete__cancel {
+  background: var(--color-neutral-100);
+  color: var(--text-primary);
+}
+.privacyDelete__cancel:hover { background: var(--color-neutral-200); }
+
+.privacyDelete__confirm {
+  background: #ba1a1a;
+  color: #fff;
+}
+.privacyDelete__confirm:hover { background: #9b1515; }
+
+/* Privacy hint */
+.privacyHint {
+  text-align: center;
+  font-size: 14px;
+  color: #94a3b8;
+  line-height: 1.6;
+  margin: var(--sp-2) auto 0;
+  max-width: 280px;
+}
+
+.privacyHint__link {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: inherit;
+  font-weight: 600;
+  color: var(--color-primary-500);
+  cursor: pointer;
+  font-family: inherit;
+}
+.privacyHint__link:hover { text-decoration: underline; }

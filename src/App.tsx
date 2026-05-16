@@ -5,6 +5,8 @@ import { LoginView } from './features/login/LoginView';
 import { PlaceholderView } from './features/placeholder/PlaceholderView';
 import { AccountView } from './features/account/AccountView';
 import { SensorStatusView } from './features/sensor/SensorStatusView';
+import { GlycemiaTargetEditView } from './features/account/GlycemiaTargetEditView';
+import { PrivacyView } from './features/account/PrivacyView';
 import { api, type User } from './mocks';
 import type { DetailRoute } from './features/dashboard/tiles/types';
 
@@ -56,6 +58,22 @@ function App() {
     );
   }
 
+  if (detail === 'edit-target') {
+    return (
+      <AppShell active={active} onChange={(r) => { setActive(r); setDetail(null); }}>
+        <GlycemiaTargetEditView onBack={() => setDetail(null)} />
+      </AppShell>
+    );
+  }
+
+  if (detail === 'privacy') {
+    return (
+      <AppShell active={active} onChange={(r) => { setActive(r); setDetail(null); }}>
+        <PrivacyView onBack={() => setDetail(null)} />
+      </AppShell>
+    );
+  }
+
   const ctx = { user, onNavigate: (r: DetailRoute) => setDetail(r) };
 
   const content = (() => {
@@ -63,7 +81,7 @@ function App() {
       case 'home':
         return <DashboardView ctx={ctx} />;
       case 'account':
-        return <AccountView user={user} onLogout={handleLogout} />;
+        return <AccountView user={user} onLogout={handleLogout} onEditTarget={() => setDetail('edit-target')} onPrivacy={() => setDetail('privacy')} />;
       case 'glycemia':
         return (
           <PlaceholderView

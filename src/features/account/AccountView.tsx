@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Button, Card, Icon } from '../../components';
 import { useUnit, convertGlycemia } from '../../contexts/UnitContext';
+import { useGlycemiaTarget } from '../../contexts/GlycemiaTargetContext';
 import { api, type AccountProfile, type User } from '../../mocks';
 import './AccountView.css';
 
 type Props = {
   user: User;
   onLogout?: () => void;
+  onEditTarget?: () => void;
+  onPrivacy?: () => void;
 };
 
 function formatGlucose(value: number, unit: 'mg/dL' | 'mmol/L'): string {
@@ -21,9 +24,10 @@ function getInitials(user: User): string {
   return initials.toUpperCase();
 }
 
-export function AccountView({ user, onLogout }: Props) {
+export function AccountView({ user, onLogout, onEditTarget, onPrivacy }: Props) {
   const [profile, setProfile] = useState<AccountProfile | null>(null);
   const { unit, setUnit } = useUnit();
+  const { target } = useGlycemiaTarget();
 
   useEffect(() => {
     let alive = true;
@@ -93,7 +97,7 @@ export function AccountView({ user, onLogout }: Props) {
             <button
               type="button"
               className="account__iconButton"
-              onClick={() => handleAction('Edycja celu glikemii')}
+              onClick={onEditTarget}
               aria-label="Edytuj cel glikemii"
             >
               <Icon name="edit" size={16} />
@@ -101,9 +105,7 @@ export function AccountView({ user, onLogout }: Props) {
           )}
         >
           <div className="account__targetValue">
-            {isLoaded && clinical
-              ? `${formatGlucose(clinical.targetMin, unit)} – ${formatGlucose(clinical.targetMax, unit)} ${unitLabel}`
-              : '—'}
+            {`${formatGlucose(target.min, unit)} – ${formatGlucose(target.max, unit)} ${unitLabel}`}
           </div>
         </Card>
       </section>
@@ -169,7 +171,7 @@ export function AccountView({ user, onLogout }: Props) {
           <button
             type="button"
             className="account__row account__rowButton"
-            onClick={() => handleAction('Prywatność i bezpieczeństwo')}
+            onClick={onPrivacy ?? (() => handleAction('Prywatność i bezpieczeństwo'))}
           >
             <div className="account__rowIcon">
               <Icon name="shield" size={18} />

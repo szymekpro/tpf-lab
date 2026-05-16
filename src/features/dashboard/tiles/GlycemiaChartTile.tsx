@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Card } from '../../../components';
 import { useUnit, convertGlycemia } from '../../../contexts/UnitContext';
+import { useGlycemiaTarget } from '../../../contexts/GlycemiaTargetContext';
 import { api, type GlycemiaPoint } from '../../../mocks';
 import type { TileDefinition } from './types';
 import './GlycemiaChartTile.css';
@@ -29,6 +30,7 @@ function project(points: GlycemiaPoint[]) {
 function GlycemiaChart() {
   const [points, setPoints] = useState<GlycemiaPoint[] | null>(null);
   const { unit } = useUnit();
+  const { target } = useGlycemiaTarget();
 
   useEffect(() => {
     let alive = true;
@@ -45,12 +47,12 @@ function GlycemiaChart() {
     return { linePath: line, areaPath: area };
   }, [points]);
 
-  // Pasek strefy docelowej (70–180 mg/dL)
+  // Pasek strefy docelowej (z kontekstu)
   const innerH = H - PAD_T - PAD_B;
-  const yTop    = PAD_T + (1 - (180 - Y_MIN) / (Y_MAX - Y_MIN)) * innerH;
-  const yBot    = PAD_T + (1 - (70  - Y_MIN) / (Y_MAX - Y_MIN)) * innerH;
+  const yTop    = PAD_T + (1 - (target.max - Y_MIN) / (Y_MAX - Y_MIN)) * innerH;
+  const yBot    = PAD_T + (1 - (target.min - Y_MIN) / (Y_MAX - Y_MIN)) * innerH;
 
-  const yTicksMgdl = [70, 180, 250];
+  const yTicksMgdl = [target.min, target.max, 250].filter((v, i, a) => a.indexOf(v) === i).sort((a, b) => a - b);
   const xTicks = [0, 6, 12, 18];
   const chartBottomY = H - PAD_B;
 
