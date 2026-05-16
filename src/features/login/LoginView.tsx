@@ -32,9 +32,7 @@ export function LoginView({ onLoggedIn, onGoToRegister, onForgotPassword }: Prop
   return (
     <div className="login">
       <header className="login__brand">
-        <div className="login__logo" aria-hidden="true">
-          <Icon name="shield" size={28} />
-        </div>
+        <Icon name="shield" size={48} className="login__logo" aria-hidden="true" />
         <h1 className="login__brandName">DiabetCare</h1>
         <p className="login__tagline">Kliniczna przejrzystość w&nbsp;zarządzaniu cukrzycą</p>
       </header>
@@ -49,7 +47,8 @@ export function LoginView({ onLoggedIn, onGoToRegister, onForgotPassword }: Prop
             autoComplete="email"
             placeholder="Wprowadź swój e-mail"
             value={email}
-            onChange={e => setEmail(e.target.value)}
+            onChange={e => { setEmail(e.target.value); setError(null); }}
+            invalid={!!error}
             required
           />
           <Input
@@ -58,11 +57,12 @@ export function LoginView({ onLoggedIn, onGoToRegister, onForgotPassword }: Prop
             autoComplete="current-password"
             placeholder="Wprowadź swoje hasło"
             value={password}
-            onChange={e => setPassword(e.target.value)}
+            onChange={e => { setPassword(e.target.value); setError(null); }}
             togglePassword
+            invalid={!!error}
             required
-            error={error ?? undefined}
           />
+          {error && <p className="login__error">{error}</p>}
 
           <div className="login__forgot">
             <button

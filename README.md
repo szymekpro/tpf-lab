@@ -1,73 +1,82 @@
-# React + TypeScript + Vite
+# DiabetCare — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplikacja webowa typu CGM (Continuous Glucose Monitoring) do zarządzania cukrzycą. Wyłącznie frontend — backend jest w pełni zamockowany.
 
-Currently, two official plugins are available:
+## Stos technologiczny
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+| Warstwa | Technologia |
+|---|---|
+| Framework | React 18 + TypeScript |
+| Bundler | Vite |
+| Style | CSS Modules (plain CSS z design tokenami) |
+| Czcionki | Outfit (nagłówki), Manrope (treść) — Google Fonts |
+| Ikony | Inline SVG (własny komponent `Icon`) |
 
-## React Compiler
+## Uruchomienie
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Aplikacja działa na `http://localhost:5173`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Logowanie (mock)
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Backend nie istnieje — API jest w pełni zasymulowane przez pliki w `src/mocks/`.
+Sesja przechowywana w `sessionStorage` (kasowana po zamknięciu przeglądarki).
+
+| Login | Hasło |
+|---|---|
+| `admin` | `admin` |
+| `anna.kowalska@example.com` | `admin` |
+
+## Struktura projektu
+
 ```
+src/
+├── components/          # Komponenty UI (Button, Card, Icon, Input)
+├── design-system/       # Tokeny projektowe (kolory, spacing, promienie)
+├── features/
+│   ├── login/           # Ekran logowania
+│   ├── dashboard/       # Ekran główny (kafelki: glikemia, statystyki, wykres)
+│   │   └── tiles/       # Rejestr kafelków dashboardu
+│   ├── account/         # Profil użytkownika + parametry kliniczne
+│   └── placeholder/     # Widok zastępczy dla niezaimplementowanych zakładek
+├── layouts/
+│   └── AppShell.tsx     # Nawigacja dolna + nagłówek aplikacji
+├── mocks/               # Zamockowane API
+│   ├── api.ts           # Funkcje api.login(), api.getCurrentUser() itp.
+│   └── types.ts         # Typy danych
+└── index.css            # Globalne CSS i design tokeny (zmienne CSS)
+```
+
+## Widoki aplikacji
+
+| Zakładka | Status | Opis |
+|---|---|---|
+| Główny | ✅ Zaimplementowany | Bieżąca glikemia, TIR/GMI/IOB, wykres 24h |
+| Glikemia | 🔧 Placeholder | Historia pomiarów (w przygotowaniu) |
+| Posiłki | 🔧 Placeholder | Kalkulator posiłków (w przygotowaniu) |
+| Insulina | 🔧 Placeholder | Kalkulator bolusa (w przygotowaniu) |
+| Konto | ✅ Zaimplementowany | Profil, parametry kliniczne, preferencje |
+
+## Mock API — dostępne funkcje
+
+```ts
+api.login(email, password)       // Logowanie — walidacja credentials
+api.getCurrentUser()             // Zwraca zalogowanego użytkownika lub rzuca błąd
+api.logout()                     // Kasuje sesję
+api.getCurrentGlycemia()         // Aktualny odczyt CGM
+api.getGlycemia24h()             // Dane wykresu 24h
+api.getDashboardStats()          // Statystyki: TIR, GMI, IOB
+api.getAccountProfile()          // Profil + parametry kliniczne
+```
+
+## Design
+
+Projekt bazuje na makietach Figma. Tokeny kolorystyczne:
+
+- **Primary** — teal `#087E8B` (główny kolor akcji)
+- **Tertiary** — zielony `#2E7D32` (strefa docelowa glikemii)
+- **Neutral** — szarości od `#F8F9FA` do `#1A1F24`

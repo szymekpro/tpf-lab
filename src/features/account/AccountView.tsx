@@ -1,19 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Button, Card, Icon } from '../../components';
-import { api, type AccountProfile, type GlycemiaUnit, type User } from '../../mocks';
+import { useUnit, convertGlycemia } from '../../contexts/UnitContext';
+import { api, type AccountProfile, type User } from '../../mocks';
 import './AccountView.css';
 
 type Props = {
   user: User;
+  onLogout?: () => void;
 };
 
-const MGDL_TO_MMOLL = 0.0555;
-
-function formatGlucose(value: number, unit: GlycemiaUnit): string {
-  if (unit === 'mmol/L') {
-    return (value * MGDL_TO_MMOLL).toFixed(1);
-  }
-  return value.toString();
+function formatGlucose(value: number, unit: 'mg/dL' | 'mmol/L'): string {
+  return convertGlycemia(value, unit).toString();
 }
 
 function getInitials(user: User): string {
@@ -24,17 +21,13 @@ function getInitials(user: User): string {
   return initials.toUpperCase();
 }
 
-export function AccountView({ user }: Props) {
+export function AccountView({ user, onLogout }: Props) {
   const [profile, setProfile] = useState<AccountProfile | null>(null);
-  const [unit, setUnit] = useState<GlycemiaUnit>('mg/dL');
+  const { unit, setUnit } = useUnit();
 
   useEffect(() => {
     let alive = true;
-    api.getAccountProfile().then(p => {
-      if (!alive) return;
-      setProfile(p);
-      setUnit(p.preferences.unit);
-    });
+    api.getAccountProfile().then(p => { if (alive) setProfile(p); });
     return () => { alive = false; };
   }, []);
 
@@ -195,7 +188,7 @@ export function AccountView({ user }: Props) {
         fullWidth
         className="account__logoutButton"
         iconLeft={<Icon name="logout" size={18} />}
-        onClick={() => handleAction('Wyloguj się')}
+        onClick={onLogout ?? (() => handleAction('Wyloguj się'))}
       >
         Wyloguj się
       </Button>

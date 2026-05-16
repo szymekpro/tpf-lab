@@ -1,9 +1,11 @@
 .login {
   min-height: 100vh;
-  background: linear-gradient(180deg, var(--color-primary-500) 0%, var(--color-primary-700) 100%);
+  width: 100%;
+  background: var(--color-primary-500);
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   padding: var(--sp-8) var(--sp-5);
   color: var(--text-inverse);
 }
@@ -14,45 +16,40 @@
   flex-direction: column;
   align-items: center;
   gap: var(--sp-3);
-  margin-top: var(--sp-6);
   margin-bottom: var(--sp-8);
   max-width: 320px;
+  color: var(--text-inverse);
 }
 
 .login__logo {
-  width: 56px;
-  height: 56px;
-  border-radius: var(--r-pill);
-  background: rgba(255,255,255,0.14);
-  border: 1px solid rgba(255,255,255,0.22);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   color: var(--text-inverse);
+  opacity: 0.95;
 }
 
 .login__brandName {
   font-family: var(--font-headline);
-  font-size: var(--fs-display);
+  font-size: 32px;
   font-weight: 800;
-  color: var(--text-inverse);
+  letter-spacing: -0.025em;
+  color: #eafcff;
   margin: 0;
 }
 
 .login__tagline {
   font-size: var(--fs-body);
-  color: rgba(255,255,255,0.85);
-  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.5;
+  margin: 0;
 }
 
 .login__card {
   width: 100%;
-  max-width: 380px;
+  max-width: 420px;
   background: var(--bg-surface);
   color: var(--text-primary);
-  border-radius: var(--r-xl);
-  box-shadow: var(--shadow-lg);
-  padding: var(--sp-6);
+  border-radius: 24px;
+  box-shadow: 0 4px 6px rgba(8, 126, 139, 0.12), 0 16px 36px rgba(8, 126, 139, 0.16);
+  padding: var(--sp-8);
   display: flex;
   flex-direction: column;
   gap: var(--sp-5);
@@ -62,12 +59,20 @@
   font-family: var(--font-headline);
   font-size: var(--fs-h2);
   font-weight: 700;
+  color: var(--color-secondary-700);
+  margin: 0 0 var(--sp-2);
 }
 
 .login__form {
   display: flex;
   flex-direction: column;
   gap: var(--sp-4);
+}
+
+.login__error {
+  font-size: var(--fs-small);
+  color: var(--color-danger-500);
+  margin: -4px 0 0;
 }
 
 .login__forgot {
@@ -81,7 +86,7 @@
   border: 0;
   padding: 0;
   cursor: pointer;
-  color: var(--color-primary-500);
+  color: var(--color-primary-600);
   font-weight: 600;
   font-size: var(--fs-small);
 }
@@ -92,4 +97,5 @@
   text-align: center;
   font-size: var(--fs-small);
   color: var(--text-secondary);
+  margin: 0;
 }

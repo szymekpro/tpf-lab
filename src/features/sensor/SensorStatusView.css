@@ -1,0 +1,393 @@
+.sensorView {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  background: var(--bg-app);
+}
+
+/* ── Header ── */
+.sensorView__header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: 0 var(--sp-6);
+  height: 64px;
+  background: var(--bg-app);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.sensorView__back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-pill);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: var(--color-primary-500);
+  padding: var(--sp-2);
+  margin-left: -8px;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+.sensorView__back:hover { background: var(--color-primary-50); }
+
+.sensorView__title {
+  font-family: var(--font-body);
+  font-size: var(--fs-h3);
+  font-weight: 500;
+  color: var(--color-primary-500);
+  margin: 0;
+  letter-spacing: -0.025em;
+}
+
+/* ── Body ── */
+.sensorView__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: var(--sp-2) var(--sp-6) calc(80px + var(--sp-6));
+}
+
+/* ── Status card ── */
+.sensorCard {
+  position: relative;
+  background: var(--bg-surface);
+  border-radius: var(--r-md);
+  box-shadow: 0 4px 12px rgba(8, 126, 139, 0.08);
+  padding: var(--sp-4);
+  overflow: hidden;
+}
+
+.sensorCard__bg {
+  position: absolute;
+  top: -24px;
+  right: -24px;
+  width: 96px;
+  height: 96px;
+  border-radius: var(--r-pill);
+  background: var(--color-primary-500);
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+.sensorCard__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sensorCard__left {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.sensorCard__iconWrap {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-pill);
+  background: rgba(8, 126, 139, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary-500);
+  flex-shrink: 0;
+}
+
+.sensorCard__model {
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  color: var(--text-primary);
+  display: block;
+}
+
+.sensorCard__glycemia {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.sensorCard__glycemiaVal {
+  font-family: var(--font-headline);
+  font-size: var(--fs-h2);
+  font-weight: 800;
+  color: var(--color-primary-500);
+  line-height: 1;
+}
+
+.sensorCard__glycemiaUnit {
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}
+
+.sensorCard__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: var(--r-pill);
+  padding: 4px 10px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.sensorCard__badge--active {
+  background: rgba(51, 130, 54, 0.10);
+  color: #338236;
+}
+.sensorCard__badge--offline {
+  background: rgba(211, 47, 47, 0.10);
+  color: var(--color-danger-500);
+}
+
+.sensorCard__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* ── Section base ── */
+.sensorSection {
+  background: var(--bg-surface);
+  border-radius: var(--r-md);
+  box-shadow: 0 4px 6px rgba(8, 126, 139, 0.08);
+  padding: var(--sp-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.sensorSection__heading {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding-bottom: var(--sp-1);
+  color: var(--color-secondary-700);
+}
+.sensorSection__heading h2 {
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-secondary-700);
+}
+
+.sensorSection__headingBordered {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding-bottom: var(--sp-3);
+  border-bottom: 1px solid rgba(189, 200, 202, 0.3);
+  color: var(--color-secondary-700);
+}
+.sensorSection__headingBordered h2 {
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-secondary-700);
+}
+
+.sensorSection__historyTitle {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-secondary-700);
+  margin: 0 0 -4px;
+}
+
+.sensorSection__desc {
+  font-size: 14px;
+  color: var(--color-secondary-700);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.sensorSection__link {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-primary-500);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  padding-top: var(--sp-2);
+}
+.sensorSection__link:hover { text-decoration: underline; }
+
+.sensorSection__pairLink {
+  text-align: center;
+  padding: var(--sp-3) 0;
+  border-radius: var(--r-sm);
+  width: 100%;
+}
+
+/* ── Calibration form ── */
+.sensorCalib__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.sensorCalib__fieldWrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.sensorCalib__label {
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: 0.02em;
+}
+
+.sensorCalib__inputRow {
+  position: relative;
+}
+
+.sensorCalib__input {
+  width: 100%;
+  height: 50px;
+  padding: 0 60px 0 var(--sp-4);
+  background: var(--color-neutral-50);
+  border: 1px solid #bdc8ca;
+  border-radius: var(--r-sm);
+  font-size: var(--fs-body);
+  color: var(--text-primary);
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+.sensorCalib__input::placeholder { color: var(--text-muted); }
+.sensorCalib__input:focus {
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px var(--color-primary-50);
+}
+
+.sensorCalib__unit {
+  position: absolute;
+  right: var(--sp-4);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: var(--fs-body);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.sensorCalib__btn {
+  width: 100%;
+  height: 44px;
+  background: var(--color-primary-500);
+  color: #eafcff;
+  border: 0;
+  border-radius: var(--r-sm);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+.sensorCalib__btn:hover { background: var(--color-primary-600); }
+.sensorCalib__btn:active { transform: translateY(1px); }
+
+/* ── Calibration history ── */
+.sensorHistory {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sensorHistory__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(189, 200, 202, 0.3);
+}
+.sensorHistory__item:last-child { border-bottom: 0; }
+
+.sensorHistory__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sensorHistory__date {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 16px;
+}
+
+.sensorHistory__source {
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+  line-height: 18px;
+}
+
+.sensorHistory__value {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.sensorHistory__num {
+  font-family: var(--font-headline);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.sensorHistory__unit {
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}
+
+/* ── Pairing steps ── */
+.sensorSteps {
+  list-style: none;
+  margin: 0;
+  padding: var(--sp-1) 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.sensorSteps__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+}
+
+.sensorSteps__num {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--r-pill);
+  background: #e1e3e4;
+  color: var(--color-secondary-700);
+  font-size: var(--fs-small);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.sensorSteps__text {
+  font-size: 14px;
+  color: var(--text-primary);
+  line-height: 1.5;
+}

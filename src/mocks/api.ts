@@ -8,6 +8,7 @@ import type {
   DashboardStats,
   GlycemiaPoint,
   GlycemiaSnapshot,
+  SensorStatus,
   User,
 } from './types';
 
@@ -21,6 +22,31 @@ const MOCK_USER: User = {
   lastName: 'Kowalska',
   email: 'anna.kowalska@example.com',
 };
+
+/** Mock credentials: admin / admin  lub  anna.kowalska@example.com / dowolne hasło ≥4 znaki */
+const MOCK_CREDENTIALS: Record<string, string> = {
+  'admin': 'admin',
+  'anna.kowalska@example.com': 'admin',
+};
+
+const SESSION_KEY = 'diabetcare_session';
+
+function saveSession(user: User) {
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
+}
+
+function clearSession() {
+  sessionStorage.removeItem(SESSION_KEY);
+}
+
+function loadSession(): User | null {
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    return raw ? (JSON.parse(raw) as User) : null;
+  } catch {
+    return null;
+  }
+}
 
 const MOCK_ACCOUNT: AccountProfile = {
   user: MOCK_USER,
@@ -37,15 +63,24 @@ const MOCK_ACCOUNT: AccountProfile = {
 
 export async function login(email: string, password: string): Promise<User> {
   await delay(450);
-  if (!email.includes('@') || password.length < 4) {
-    throw new Error('Nieprawidłowy e-mail lub hasło.');
+  const expected = MOCK_CREDENTIALS[email];
+  if (!expected || expected !== password) {
+    throw new Error('Nieprawidłowy login lub hasło.');
   }
+  saveSession(MOCK_USER);
   return MOCK_USER;
 }
 
 export async function getCurrentUser(): Promise<User> {
-  await delay(300);
-  return MOCK_USER;
+  await delay(200);
+  const user = loadSession();
+  if (!user) throw new Error('Brak aktywnej sesji.');
+  return user;
+}
+
+export async function logout(): Promise<void> {
+  await delay(100);
+  clearSession();
 }
 
 export async function getAccountProfile(): Promise<AccountProfile> {
@@ -55,20 +90,53 @@ export async function getAccountProfile(): Promise<AccountProfile> {
 
 /* =================== DASHBOARD =================== */
 
-export async function getCurrentGlycemia(): Promise<GlycemiaSnapshot> {
-  await delay(150);
+/**
+ * Wewnętrzny stan glikemii – jedyne źródło prawdy dla mock sensora.
+ * Kalibracja modyfikuje tę wartość z korektą 80%.
+ */
+let _glycemia = 124;
+
+function buildSnapshot(): GlycemiaSnapshot {
   return {
-    value: 124,
+    value: Math.round(_glycemia),
     trend: 'flat',
-    inRange: true,
+    inRange: _glycemia >= 70 && _glycemia <= 180,
     sensorOnline: true,
     measuredAt: new Date().toISOString(),
   };
 }
 
+export async function getCurrentGlycemia(): Promise<GlycemiaSnapshot> {
+  await delay(150);
+  return buildSnapshot();
+}
+
+/**
+ * Kalibracja: nowa wartość = obecna + 80% różnicy (nie przeskakuje bezpośrednio).
+ * Formuła: current + (calibrated − current) × 0.8
+ */
+export async function calibrate(calibrated: number): Promise<GlycemiaSnapshot> {
+  await delay(200);
+  _glycemia = _glycemia + (calibrated - _glycemia) * 0.8;
+  return buildSnapshot();
+}
+
 export async function getDashboardStats(): Promise<DashboardStats> {
   await delay(150);
   return { tir: 78, gmi: 6.8, iob: 2.4 };
+}
+
+export async function getSensorStatus(): Promise<SensorStatus> {
+  await delay(180);
+  return {
+    online: true,
+    model: 'Dexcom G6',
+    calibrationHistory: [
+      { label: 'Dzisiaj, 08:30',   source: 'Glukometr', value: 112 },
+      { label: 'Wczoraj, 19:15',   source: 'Glukometr', value: 98  },
+      { label: '12 Paź, 07:45',    source: 'Glukometr', value: 105 },
+    ],
+  };
 }
 
 /** Punkty w ciągu ostatnich 24h, krok 30 minut – w sumie 49 próbek. */

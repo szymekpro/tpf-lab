@@ -46,6 +46,19 @@ export type AccountClinical = {
   targetMax: number;
 };
 
+export type CalibrationEntry = {
+  /** Etykieta daty, np. "Dzisiaj, 08:30" */
+  label: string;
+  source: string;
+  value: number;
+};
+
+export type SensorStatus = {
+  online: boolean;
+  model: string;
+  calibrationHistory: CalibrationEntry[];
+};
+
 export type AccountPreferences = {
   unit: GlycemiaUnit;
 };

@@ -5,6 +5,8 @@ import './Input.css';
 type Props = Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> & {
   label?: string;
   error?: string;
+  /** Zaznacza pole na czerwono bez wyświetlania tekstu błędu. */
+  invalid?: boolean;
   iconRight?: ReactNode;
   /** Dla `type="password"` automatycznie pokazuje przełącznik widoczności hasła. */
   togglePassword?: boolean;
@@ -13,6 +15,7 @@ type Props = Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> & {
 export function Input({
   label,
   error,
+  invalid,
   iconRight,
   togglePassword,
   type = 'text',
@@ -26,7 +29,7 @@ export function Input({
   const effectiveType = togglePassword && show ? 'text' : type;
 
   return (
-    <div className={`field ${error ? 'field--error' : ''} ${className}`}>
+    <div className={`field ${(error || invalid) ? 'field--error' : ''} ${className}`}>
       {label && <label htmlFor={inputId} className="field__label">{label}</label>}
       <div className="field__control">
         <input id={inputId} type={effectiveType} className="field__input" {...rest} />

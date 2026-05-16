@@ -1,6 +1,8 @@
 import type { ComponentType } from 'react';
 import type { User } from '../../../mocks';
 
+export type DetailRoute = 'sensor';
+
 /**
  * Kontekst, który DashboardView przekazuje do każdego kafelka.
  * Dodawanie nowych pól tutaj nie wymaga zmian w istniejących kafelkach
@@ -8,6 +10,7 @@ import type { User } from '../../../mocks';
  */
 export type TileContext = {
   user: User;
+  onNavigate?: (route: DetailRoute) => void;
 };
 
 /**

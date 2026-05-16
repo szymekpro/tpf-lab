@@ -24,7 +24,7 @@
   padding: 0 var(--sp-4);
   border: 1px solid var(--border-subtle);
   background: var(--bg-surface);
-  border-radius: var(--r-md);
+  border-radius: var(--r-lg);
   outline: none;
   transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
 }

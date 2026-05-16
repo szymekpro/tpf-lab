@@ -102,13 +102,6 @@ textarea {
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  padding: var(--sp-6) var(--sp-3);
-}
-
-@media (max-width: 520px) {
-  #root {
-    padding: 0;
-  }
 }
 
 .app__boot {

@@ -1,6 +1,7 @@
 .glycemiaHero {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: var(--sp-3);
 }
 
@@ -43,10 +44,16 @@
   display: inline-flex;
   align-items: center;
   gap: var(--sp-2);
-  align-self: flex-start;
   background: rgba(255,255,255,0.16);
   border: 1px solid rgba(255,255,255,0.22);
   border-radius: var(--r-pill);
   padding: 6px 12px;
   font-size: var(--fs-small);
+  font-family: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+.glycemiaHero__sensor:hover {
+  background: rgba(255,255,255,0.26);
 }

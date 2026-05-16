@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Card } from '../../../components';
+import { useUnit, convertGlycemia } from '../../../contexts/UnitContext';
 import { api, type GlycemiaPoint } from '../../../mocks';
 import type { TileDefinition } from './types';
 import './GlycemiaChartTile.css';
@@ -27,6 +28,7 @@ function project(points: GlycemiaPoint[]) {
 
 function GlycemiaChart() {
   const [points, setPoints] = useState<GlycemiaPoint[] | null>(null);
+  const { unit } = useUnit();
 
   useEffect(() => {
     let alive = true;
@@ -34,10 +36,13 @@ function GlycemiaChart() {
     return () => { alive = false; };
   }, []);
 
-  const linePath = useMemo(() => {
-    if (!points) return '';
+  const { linePath, areaPath } = useMemo(() => {
+    if (!points) return { linePath: '', areaPath: '' };
     const proj = project(points);
-    return proj.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
+    const line = proj.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
+    const bottomY = (H - PAD_B).toFixed(1);
+    const area = `${line} L${proj.at(-1)!.x.toFixed(1)} ${bottomY} L${proj[0].x.toFixed(1)} ${bottomY} Z`;
+    return { linePath: line, areaPath: area };
   }, [points]);
 
   // Pasek strefy docelowej (70–180 mg/dL)
@@ -45,8 +50,9 @@ function GlycemiaChart() {
   const yTop    = PAD_T + (1 - (180 - Y_MIN) / (Y_MAX - Y_MIN)) * innerH;
   const yBot    = PAD_T + (1 - (70  - Y_MIN) / (Y_MAX - Y_MIN)) * innerH;
 
-  const yTicks = [70, 180, 250];
+  const yTicksMgdl = [70, 180, 250];
   const xTicks = [0, 6, 12, 18];
+  const chartBottomY = H - PAD_B;
 
   return (
     <Card title="Glikemia (24h)">
@@ -59,18 +65,26 @@ function GlycemiaChart() {
             width={W - PAD_L - PAD_R}
             height={yBot - yTop}
             fill="var(--color-tertiary-100)"
-            opacity={0.6}
+            opacity={0.5}
           />
+
+          {/* Wypełnienie pod linią */}
+          {areaPath && (
+            <path d={areaPath} fill="var(--color-tertiary-100)" opacity={0.55} />
+          )}
           {/* Y-grid + etykiety */}
-          {yTicks.map(v => {
+          {yTicksMgdl.map(v => {
             const y = PAD_T + (1 - (v - Y_MIN) / (Y_MAX - Y_MIN)) * innerH;
+            const label = convertGlycemia(v, unit);
             return (
               <g key={`y-${v}`}>
                 <line x1={PAD_L} x2={W - PAD_R} y1={y} y2={y} stroke="var(--border-subtle)" strokeDasharray="2 4" />
-                <text x={PAD_L - 8} y={y + 4} textAnchor="end" className="chart__yLabel">{v}</text>
+                <text x={PAD_L - 8} y={y + 4} textAnchor="end" className="chart__yLabel">{label}</text>
               </g>
             );
           })}
+          {/* Etykieta 0 przy linii bazowej */}
+          <text x={PAD_L - 8} y={chartBottomY + 4} textAnchor="end" className="chart__yLabel">0</text>
           {/* X labels */}
           {xTicks.map(h => {
             const x = PAD_L + (h / 24) * (W - PAD_L - PAD_R);

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Card, Icon } from '../../../components';
+import { useUnit, convertGlycemia } from '../../../contexts/UnitContext';
 import { api, type GlycemiaSnapshot } from '../../../mocks';
-import type { TileDefinition } from './types';
+import type { TileContext, TileDefinition } from './types';
 import './GlycemiaHeroTile.css';
 
 function trendArrow(t: GlycemiaSnapshot['trend']): string {
@@ -10,8 +11,9 @@ function trendArrow(t: GlycemiaSnapshot['trend']): string {
   return '→';
 }
 
-function GlycemiaHero() {
+function GlycemiaHero({ onNavigate }: TileContext) {
   const [snap, setSnap] = useState<GlycemiaSnapshot | null>(null);
+  const { unit } = useUnit();
 
   useEffect(() => {
     let alive = true;
@@ -28,20 +30,25 @@ function GlycemiaHero() {
       <div className="glycemiaHero">
         <div className="glycemiaHero__valueRow">
           <span className="glycemiaHero__value">
-            {snap ? snap.value : '—'}
+            {snap ? convertGlycemia(snap.value, unit) : '—'}
           </span>
           <div className="glycemiaHero__unitCol">
-            <span className="glycemiaHero__unit">mg/dL</span>
+            <span className="glycemiaHero__unit">{unit}</span>
             <span className="glycemiaHero__trend" aria-label="trend">
               {snap ? trendArrow(snap.trend) : ''}
             </span>
           </div>
         </div>
         <p className="glycemiaHero__status">{status}</p>
-        <div className="glycemiaHero__sensor">
+        <button
+          type="button"
+          className="glycemiaHero__sensor"
+          onClick={() => onNavigate?.('sensor')}
+          aria-label="Otwórz status sensora"
+        >
           <Icon name="signal" size={16} />
           <span>Status sensora: {snap?.sensorOnline ? 'online' : 'offline'}</span>
-        </div>
+        </button>
       </div>
     </Card>
   );
