@@ -7,21 +7,28 @@ import { AccountView } from './features/account/AccountView';
 import { SensorStatusView } from './features/sensor/SensorStatusView';
 import { GlycemiaTargetEditView } from './features/account/GlycemiaTargetEditView';
 import { PrivacyView } from './features/account/PrivacyView';
-import { api, type User } from './mocks';
+import { GlycemiaView } from './features/glycemia/GlycemiaView';
+import { ReportsView } from './features/reports/ReportsView';
+import { RegisterView } from './features/login/RegisterView';
+import { ForgotPasswordView } from './features/login/ForgotPasswordView';
+import type { User } from './mocks';
+import { firebaseLogout, onAuthChanged } from './lib/auth';
 import type { DetailRoute } from './features/dashboard/tiles/types';
 
 function App() {
   const [active, setActive] = useState<AppRoute>('home');
   const [detail, setDetail] = useState<DetailRoute | null>(null);
+  const [glycemiaView, setGlycemiaView] = useState<'main' | 'reports'>('main');
+  const [authScreen, setAuthScreen] = useState<'login' | 'register' | 'forgot'>('login');
   const [user, setUser] = useState<User | null>(null);
   const [booting, setBooting] = useState(true);
 
   useEffect(() => {
-    let alive = true;
-    api.getCurrentUser()
-      .then(u => { if (alive) setUser(u); })
-      .finally(() => { if (alive) setBooting(false); });
-    return () => { alive = false; };
+    const unsubscribe = onAuthChanged(u => {
+      setUser(u);
+      setBooting(false);
+    });
+    return unsubscribe;
   }, []);
 
   if (booting) {
@@ -33,21 +40,32 @@ function App() {
   }
 
   if (!user) {
+    if (authScreen === 'register') {
+      return (
+        <RegisterView
+          onRegistered={(u) => { setUser(u); setActive('home'); setAuthScreen('login'); }}
+          onGoToLogin={() => setAuthScreen('login')}
+        />
+      );
+    }
+    if (authScreen === 'forgot') {
+      return (
+        <ForgotPasswordView
+          onGoToLogin={() => setAuthScreen('login')}
+        />
+      );
+    }
     return (
       <LoginView
-        onLoggedIn={(u) => {
-          setUser(u);
-          setActive('home');
-        }}
-        onGoToRegister={() => console.info('Rejestracja: w przygotowaniu.')}
-        onForgotPassword={() => console.info('Reset hasła: w przygotowaniu.')}
+        onLoggedIn={(u) => { setUser(u); setActive('home'); }}
+        onGoToRegister={() => setAuthScreen('register')}
+        onForgotPassword={() => setAuthScreen('forgot')}
       />
     );
   }
 
   async function handleLogout() {
-    await api.logout();
-    setUser(null);
+    await firebaseLogout();
   }
 
   if (detail === 'sensor') {
@@ -83,13 +101,10 @@ function App() {
       case 'account':
         return <AccountView user={user} onLogout={handleLogout} onEditTarget={() => setDetail('edit-target')} onPrivacy={() => setDetail('privacy')} />;
       case 'glycemia':
-        return (
-          <PlaceholderView
-            icon="drop"
-            title="Glikemia"
-            description="Tu pojawi się historia pomiarów i analizy trendów."
-          />
-        );
+        if (glycemiaView === 'reports') {
+          return <ReportsView onBack={() => setGlycemiaView('main')} />;
+        }
+        return <GlycemiaView onShowReports={() => setGlycemiaView('reports')} />;
       case 'meals':
         return (
           <PlaceholderView
@@ -112,7 +127,10 @@ function App() {
   })();
 
   return (
-    <AppShell active={active} onChange={setActive}>
+    <AppShell
+      active={active}
+      onChange={(r) => { setActive(r); setGlycemiaView('main'); }}
+    >
       {content}
     </AppShell>
   );
