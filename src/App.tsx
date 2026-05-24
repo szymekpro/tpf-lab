@@ -7,10 +7,12 @@ import { AccountView } from './features/account/AccountView';
 import { SensorStatusView } from './features/sensor/SensorStatusView';
 import { GlycemiaTargetEditView } from './features/account/GlycemiaTargetEditView';
 import { PrivacyView } from './features/account/PrivacyView';
+import MealsPage from './features/meals/MealsPage';
 import { api, type User } from './mocks';
 import type { DetailRoute } from './features/dashboard/tiles/types';
 
 function App() {
+  
   const [active, setActive] = useState<AppRoute>('home');
   const [detail, setDetail] = useState<DetailRoute | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -18,10 +20,23 @@ function App() {
 
   useEffect(() => {
     let alive = true;
-    api.getCurrentUser()
-      .then(u => { if (alive) setUser(u); })
-      .finally(() => { if (alive) setBooting(false); });
-    return () => { alive = false; };
+
+    api
+      .getCurrentUser()
+      .then((u) => {
+        if (alive) {
+          setUser(u);
+        }
+      })
+      .finally(() => {
+        if (alive) {
+          setBooting(false);
+        }
+      });
+
+    return () => {
+      alive = false;
+    };
   }, []);
 
   if (booting) {
@@ -48,11 +63,19 @@ function App() {
   async function handleLogout() {
     await api.logout();
     setUser(null);
+    setActive('home');
+    setDetail(null);
   }
 
   if (detail === 'sensor') {
     return (
-      <AppShell active={active} onChange={(r) => { setActive(r); setDetail(null); }}>
+      <AppShell
+        active={active}
+        onChange={(r) => {
+          setActive(r);
+          setDetail(null);
+        }}
+      >
         <SensorStatusView onBack={() => setDetail(null)} />
       </AppShell>
     );
@@ -60,7 +83,13 @@ function App() {
 
   if (detail === 'edit-target') {
     return (
-      <AppShell active={active} onChange={(r) => { setActive(r); setDetail(null); }}>
+      <AppShell
+        active={active}
+        onChange={(r) => {
+          setActive(r);
+          setDetail(null);
+        }}
+      >
         <GlycemiaTargetEditView onBack={() => setDetail(null)} />
       </AppShell>
     );
@@ -68,20 +97,38 @@ function App() {
 
   if (detail === 'privacy') {
     return (
-      <AppShell active={active} onChange={(r) => { setActive(r); setDetail(null); }}>
+      <AppShell
+        active={active}
+        onChange={(r) => {
+          setActive(r);
+          setDetail(null);
+        }}
+      >
         <PrivacyView onBack={() => setDetail(null)} />
       </AppShell>
     );
   }
 
-  const ctx = { user, onNavigate: (r: DetailRoute) => setDetail(r) };
+  const ctx = {
+    user,
+    onNavigate: (r: DetailRoute) => setDetail(r),
+  };
 
   const content = (() => {
     switch (active) {
       case 'home':
         return <DashboardView ctx={ctx} />;
+
       case 'account':
-        return <AccountView user={user} onLogout={handleLogout} onEditTarget={() => setDetail('edit-target')} onPrivacy={() => setDetail('privacy')} />;
+        return (
+          <AccountView
+            user={user}
+            onLogout={handleLogout}
+            onEditTarget={() => setDetail('edit-target')}
+            onPrivacy={() => setDetail('privacy')}
+          />
+        );
+
       case 'glycemia':
         return (
           <PlaceholderView
@@ -90,14 +137,10 @@ function App() {
             description="Tu pojawi się historia pomiarów i analizy trendów."
           />
         );
+
       case 'meals':
-        return (
-          <PlaceholderView
-            icon="fork"
-            title="Posiłki"
-            description="W przygotowaniu: planowanie posiłków i dawki insuliny."
-          />
-        );
+        return <MealsPage />;
+
       case 'insulin':
         return (
           <PlaceholderView
@@ -106,6 +149,7 @@ function App() {
             description="Kalkulator bolusa i harmonogram podań."
           />
         );
+
       default:
         return <DashboardView ctx={ctx} />;
     }
