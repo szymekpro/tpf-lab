@@ -40,32 +40,53 @@
   box-shadow: var(--shadow-sm);
 }
 
-.meals__balance-card h2 {
-  margin: 0;
-  font-family: var(--font-headline);
-  font-size: var(--fs-h2);
-  font-weight: 700;
-  color: var(--color-primary-700);
+.meals__balance-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-5);
 }
 
-.meals__calories {
-  margin: 0;
+.meals__balance-card h2 {
+  margin: 0 0 var(--sp-1);
   font-family: var(--font-headline);
-  font-size: var(--fs-display);
+  font-size: 24px;
   font-weight: 800;
-  text-align: center;
+  line-height: 1.15;
   color: var(--color-primary-700);
 }
 
 .meals__date {
-  margin: 0 0 var(--sp-5);
+  margin: 0;
   font-size: var(--fs-small);
   color: var(--text-secondary);
 }
 
+.meals__calories {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  white-space: nowrap;
+  color: var(--color-primary-700);
+}
+
+.meals__calories strong {
+  font-family: var(--font-headline);
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.meals__calories span {
+  font-family: var(--font-headline);
+  font-size: 15px;
+  font-weight: 700;
+}
+
 .meals__progress-track {
   width: 100%;
-  height: 12px;
+  height: 11px;
   margin-bottom: var(--sp-5);
   overflow: hidden;
   background: var(--color-neutral-100);
@@ -86,35 +107,40 @@
 }
 
 .meals__macro-card {
-  padding: var(--sp-3) var(--sp-2);
+  min-height: 102px;
+  padding: 14px 10px 12px;
   border-radius: var(--r-sm);
   text-align: center;
 }
 
-.meals__macro-card span,
-.meals__macro-card strong,
-.meals__macro-card small {
+.meals__macro-label {
   display: block;
-}
-
-.meals__macro-card span {
-  margin-bottom: var(--sp-1);
+  margin-bottom: 8px;
   font-family: var(--font-headline);
-  font-size: var(--fs-small);
-  font-weight: 700;
+  font-size: 13px;
+  font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 .meals__macro-card strong {
+  display: block;
   font-family: var(--font-headline);
-  font-size: var(--fs-h3);
+  font-size: 27px;
   font-weight: 800;
+  line-height: 1;
+}
+
+.meals__macro-card strong em {
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 700;
 }
 
 .meals__macro-card small {
-  margin-top: var(--sp-1);
-  font-size: 10px;
+  display: block;
+  margin-top: 10px;
+  font-size: 11px;
   color: var(--text-muted);
 }
 
@@ -131,6 +157,24 @@
 .meals__macro-card--carbs {
   color: #b45309;
   background: #fff3e0;
+}
+
+.meals__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: var(--sp-4) 0 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.meals__legend span {
+  display: block;
+}
+
+.meals__legend b {
+  color: var(--text-secondary);
 }
 
 .meals__list {
@@ -219,7 +263,7 @@
   transform: translateY(0);
 }
 
-@media (max-width: 380px) {
+@media (max-width: 420px) {
   .meals {
     padding-right: var(--sp-4);
     padding-left: var(--sp-4);
@@ -230,7 +274,40 @@
     padding: var(--sp-4);
   }
 
+  .meals__balance-header {
+    align-items: flex-start;
+  }
+
+  .meals__balance-card h2 {
+    font-size: 21px;
+  }
+
+  .meals__calories strong {
+    font-size: 29px;
+  }
+
+  .meals__calories span {
+    font-size: 13px;
+  }
+
   .meals__macro-grid {
     gap: var(--sp-2);
+  }
+
+  .meals__macro-card {
+    min-height: 94px;
+    padding: 12px 7px 10px;
+  }
+
+  .meals__macro-label {
+    font-size: 12px;
+  }
+
+  .meals__macro-card strong {
+    font-size: 23px;
+  }
+
+  .meals__macro-card small {
+    font-size: 10px;
   }
 }

@@ -1,10 +1,12 @@
 import { Icon } from '../../components';
 import './MealsPage.css';
 
+type MealTone = 'teal' | 'orange' | 'blue' | 'green' | 'pink' | 'cyan';
+
 type MealItem = {
   id: number;
   name: string;
-  tone: 'teal' | 'orange' | 'blue' | 'green' | 'pink' | 'cyan';
+  tone: MealTone;
 };
 
 const meals: MealItem[] = [
@@ -27,9 +29,17 @@ export default function MealsPage() {
         <p className="meals__section-label">Podsumowanie dnia</p>
 
         <div className="meals__balance-card">
-          <h2>Dzisiejszy bilans</h2>
-          <p className="meals__calories">1 420 kcal</p>
-          <p className="meals__date">Środa, 24 maja</p>
+          <div className="meals__balance-header">
+            <div>
+              <h2>Dzisiejszy bilans</h2>
+              <p className="meals__date">Środa, 24 maja</p>
+            </div>
+
+            <div className="meals__calories">
+              <strong>1 420</strong>
+              <span>kcal</span>
+            </div>
+          </div>
 
           <div
             className="meals__progress-track"
@@ -44,20 +54,22 @@ export default function MealsPage() {
 
           <div className="meals__macro-grid">
             <div className="meals__macro-card meals__macro-card--ww">
-              <span>WW</span>
-              <strong>12.4</strong>
-              <small>cel: 18.0</small>
+              <span className="meals__macro-label">WW</span>
+              <strong>12,4</strong>
+              <small>cel: 18,0</small>
             </div>
 
             <div className="meals__macro-card meals__macro-card--wbt">
-              <span>WBT</span>
-              <strong>8.2</strong>
-              <small>cel: 12.0</small>
+              <span className="meals__macro-label">WBT</span>
+              <strong>8,2</strong>
+              <small>cel: 12,0</small>
             </div>
 
             <div className="meals__macro-card meals__macro-card--carbs">
-              <span>Węgle</span>
-              <strong>145 g</strong>
+              <span className="meals__macro-label">Węgle</span>
+              <strong>
+                145 <em>g</em>
+              </strong>
               <small>pozostało: 45 g</small>
             </div>
           </div>
