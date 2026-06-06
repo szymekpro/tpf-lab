@@ -6,7 +6,6 @@
   padding-bottom: calc(72px + var(--sp-6));
 }
 
-/* Header */
 .reports__header {
   display: flex;
   align-items: center;
@@ -36,7 +35,6 @@
   margin: 0;
 }
 
-/* Segmented control */
 .reports__segmented {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -66,7 +64,6 @@
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
-/* TIR card top row */
 .reports__tirTopRow {
   display: flex;
   gap: var(--sp-4);
@@ -74,7 +71,6 @@
   margin-bottom: var(--sp-4);
 }
 
-/* Donut chart */
 .reports__tirDonut {
   position: relative;
   flex-shrink: 0;
@@ -114,7 +110,6 @@
   letter-spacing: 0.06em;
 }
 
-/* Legend */
 .reports__tirLegend {
   flex: 1;
   display: flex;
@@ -155,7 +150,6 @@
   color: var(--text-primary);
 }
 
-/* TIR stats */
 .reports__tirStats {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -190,7 +184,6 @@
   color: var(--text-secondary);
 }
 
-/* AGP card */
 .reports__agpTitle {
   display: flex;
   align-items: center;
@@ -228,7 +221,29 @@
   color: var(--text-secondary);
 }
 
-/* Actions */
+.reports__agpLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  margin-top: var(--sp-3);
+  font-size: var(--fs-small);
+  color: var(--text-secondary);
+}
+
+.reports__legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.reports__legendSwatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
 .reports__actions {
   display: flex;
   flex-direction: column;

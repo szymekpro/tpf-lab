@@ -21,7 +21,6 @@ function GlycemiaHero({ onNavigate }: TileContext) {
     return () => { alive = false; };
   }, []);
 
-  // Zielona karta gdy w zakresie, primarna gdy poza zakresem.
   const tone = snap?.inRange === false ? 'primary' : 'tertiary';
   const status = snap?.inRange ? 'W zakresie docelowym' : 'Poza zakresem docelowym';
 

@@ -5,7 +5,6 @@
   background: var(--bg-app);
 }
 
-/* ── Header ── */
 .sensorView__header {
   display: flex;
   align-items: center;
@@ -44,7 +43,6 @@
   letter-spacing: -0.025em;
 }
 
-/* ── Body ── */
 .sensorView__body {
   display: flex;
   flex-direction: column;
@@ -52,7 +50,6 @@
   padding: var(--sp-2) var(--sp-6) calc(80px + var(--sp-6));
 }
 
-/* ── Status card ── */
 .sensorCard {
   position: relative;
   background: var(--bg-surface);
@@ -154,7 +151,6 @@
   flex-shrink: 0;
 }
 
-/* ── Section base ── */
 .sensorSection {
   background: var(--bg-surface);
   border-radius: var(--r-md);
@@ -232,7 +228,6 @@
   width: 100%;
 }
 
-/* ── Calibration form ── */
 .sensorCalib__form {
   display: flex;
   flex-direction: column;
@@ -303,7 +298,6 @@
 .sensorCalib__btn:hover { background: var(--color-primary-600); }
 .sensorCalib__btn:active { transform: translateY(1px); }
 
-/* ── Calibration history ── */
 .sensorHistory {
   list-style: none;
   margin: 0;
@@ -356,7 +350,6 @@
   color: var(--text-muted);
 }
 
-/* ── Pairing steps ── */
 .sensorSteps {
   list-style: none;
   margin: 0;

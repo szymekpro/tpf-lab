@@ -25,7 +25,6 @@
 .btn--md { height: 44px; padding: 0 var(--sp-5); font-size: var(--fs-body); }
 .btn--lg { height: 52px; padding: 0 var(--sp-6); font-size: var(--fs-body); }
 
-/* === Variants === */
 .btn--primary {
   background: var(--color-primary-500);
   color: var(--text-inverse);

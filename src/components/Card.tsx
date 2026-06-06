@@ -6,9 +6,7 @@ export type CardTone = 'surface' | 'primary' | 'tertiary' | 'inverted' | 'muted'
 type Props = HTMLAttributes<HTMLDivElement> & {
   tone?: CardTone;
   padded?: boolean;
-  /** Slot na treść lewej strony nagłówka karty */
   title?: ReactNode;
-  /** Slot na akcje po prawej stronie nagłówka */
   action?: ReactNode;
 };
 
