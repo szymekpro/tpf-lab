@@ -1,9 +1,5 @@
 import type { SVGProps } from 'react';
 
-/**
- * Pojedynczy rejestr ikon (inline SVG) – żaden zewnętrzny pakiet.
- * Dodawanie nowej ikony = dopisanie wpisu do `paths` (jeden klucz, jeden `<path>`).
- */
 const paths = {
   shield:    'M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5l-8-3Zm-1 9H8l4-7v5h3l-4 7v-5Z',
   eye:       'M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm0-6a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z',
@@ -34,7 +30,6 @@ export type IconName = keyof typeof paths;
 type Props = Omit<SVGProps<SVGSVGElement>, 'name'> & {
   name: IconName;
   size?: number;
-  /** Niektóre ikony to outline – użyj `stroke` zamiast `fill`. */
   variant?: 'fill' | 'stroke';
 };
 

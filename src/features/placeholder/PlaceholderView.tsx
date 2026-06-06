@@ -6,10 +6,6 @@ type Props = {
   description?: string;
 };
 
-/**
- * Lekki widok-zaślepka dla zakładek, które nie są jeszcze zaimplementowane.
- * Trzyma stylistykę dashboardu, dzięki czemu shell wygląda spójnie.
- */
 export function PlaceholderView({ icon, title, description }: Props) {
   return (
     <div style={{ padding: 'var(--sp-5)', paddingBottom: 'calc(72px + var(--sp-6))' }}>

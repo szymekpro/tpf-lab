@@ -10,6 +10,7 @@ type Props = {
   onLogout?: () => void;
   onEditTarget?: () => void;
   onPrivacy?: () => void;
+  onAlarms?: () => void;
 };
 
 function formatGlucose(value: number, unit: 'mg/dL' | 'mmol/L'): string {
@@ -24,7 +25,7 @@ function getInitials(user: User): string {
   return initials.toUpperCase();
 }
 
-export function AccountView({ user, onLogout, onEditTarget, onPrivacy }: Props) {
+export function AccountView({ user, onLogout, onEditTarget, onPrivacy, onAlarms }: Props) {
   const [profile, setProfile] = useState<AccountProfile | null>(null);
   const { unit, setUnit } = useUnit();
   const { target } = useGlycemiaTarget();
@@ -143,7 +144,7 @@ export function AccountView({ user, onLogout, onEditTarget, onPrivacy }: Props) 
           <button
             type="button"
             className="account__row account__rowButton"
-            onClick={() => handleAction('Powiadomienia i alarmy')}
+            onClick={onAlarms ?? (() => handleAction('Powiadomienia i alarmy'))}
           >
             <div className="account__rowIcon">
               <Icon name="bell" size={18} />
