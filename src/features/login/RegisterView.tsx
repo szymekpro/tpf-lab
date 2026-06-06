@@ -1,30 +1,38 @@
 import { useState, type FormEvent } from 'react';
 import { Button, Icon, Input } from '../../components';
-import { firebaseLogin } from '../../lib/auth';
+import { firebaseRegister } from '../../lib/auth';
 import type { User } from '../../mocks';
 import './LoginView.css';
 
 type Props = {
-  onLoggedIn: (user: User) => void;
-  onGoToRegister?: () => void;
-  onForgotPassword?: () => void;
+  onRegistered: (user: User) => void;
+  onGoToLogin: () => void;
 };
 
-export function LoginView({ onLoggedIn, onGoToRegister, onForgotPassword }: Props) {
+export function RegisterView({ onRegistered, onGoToLogin }: Props) {
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
+  const [confirm, setConfirm]   = useState('');
   const [pending, setPending]   = useState(false);
   const [error, setError]       = useState<string | null>(null);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    if (password !== confirm) {
+      setError('Hasła nie są identyczne.');
+      return;
+    }
+    if (password.length < 6) {
+      setError('Hasło musi mieć co najmniej 6 znaków.');
+      return;
+    }
     setPending(true);
     setError(null);
     try {
-      const user = await firebaseLogin(email, password);
-      onLoggedIn(user);
+      const user = await firebaseRegister(email, password);
+      onRegistered(user);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Coś poszło nie tak.');
+      setError(mapFirebaseError(err));
     } finally {
       setPending(false);
     }
@@ -39,11 +47,11 @@ export function LoginView({ onLoggedIn, onGoToRegister, onForgotPassword }: Prop
       </header>
 
       <section className="login__card">
-        <h2 className="login__title">Logowanie</h2>
+        <h2 className="login__title">Rejestracja</h2>
 
         <form onSubmit={handleSubmit} className="login__form" noValidate>
           <Input
-            label="Adres E-mail"
+            label="Adres e-mail"
             type="email"
             autoComplete="email"
             placeholder="Wprowadź swój e-mail"
@@ -55,38 +63,55 @@ export function LoginView({ onLoggedIn, onGoToRegister, onForgotPassword }: Prop
           <Input
             label="Hasło"
             type="password"
-            autoComplete="current-password"
-            placeholder="Wprowadź swoje hasło"
+            autoComplete="new-password"
+            placeholder="Min. 6 znaków"
             value={password}
             onChange={e => { setPassword(e.target.value); setError(null); }}
             togglePassword
             invalid={!!error}
             required
           />
+          <Input
+            label="Potwierdź hasło"
+            type="password"
+            autoComplete="new-password"
+            placeholder="Powtórz hasło"
+            value={confirm}
+            onChange={e => { setConfirm(e.target.value); setError(null); }}
+            togglePassword
+            invalid={!!error}
+            required
+          />
           {error && <p className="login__error">{error}</p>}
 
-          <div className="login__forgot">
-            <button
-              type="button"
-              className="login__link"
-              onClick={onForgotPassword}
-            >
-              Zapomniałem hasła
-            </button>
-          </div>
-
           <Button type="submit" fullWidth disabled={pending}>
-            {pending ? 'Logowanie…' : 'Zaloguj się'}
+            {pending ? 'Rejestracja…' : 'Zarejestruj się'}
           </Button>
         </form>
 
         <p className="login__register">
-          Nie masz jeszcze konta?{' '}
-          <button type="button" className="login__link login__link--accent" onClick={onGoToRegister}>
-            Zarejestruj się
+          Masz już konto?{' '}
+          <button type="button" className="login__link login__link--accent" onClick={onGoToLogin}>
+            Zaloguj się
           </button>
         </p>
       </section>
     </div>
   );
+}
+
+function mapFirebaseError(err: unknown): string {
+  if (err && typeof err === 'object' && 'code' in err) {
+    switch ((err as { code: string }).code) {
+      case 'auth/email-already-in-use':
+        return 'Ten adres e-mail jest już zajęty.';
+      case 'auth/invalid-email':
+        return 'Nieprawidłowy format adresu e-mail.';
+      case 'auth/weak-password':
+        return 'Hasło jest za słabe. Użyj co najmniej 6 znaków.';
+      default:
+        break;
+    }
+  }
+  return err instanceof Error ? err.message : 'Coś poszło nie tak.';
 }
