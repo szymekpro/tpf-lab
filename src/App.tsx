@@ -7,6 +7,7 @@ import { AccountView } from './features/account/AccountView';
 import { SensorStatusView } from './features/sensor/SensorStatusView';
 import { GlycemiaTargetEditView } from './features/account/GlycemiaTargetEditView';
 import { PrivacyView } from './features/account/PrivacyView';
+import MealsPage from './features/meals/MealsPage';
 import { GlycemiaView } from './features/glycemia/GlycemiaView';
 import { ReportsView } from './features/reports/ReportsView';
 import { AlarmsView } from './features/alarms/AlarmsView';
@@ -67,6 +68,9 @@ function App() {
 
   async function handleLogout() {
     await firebaseLogout();
+    setUser(null);
+    setActive('home');
+    setDetail(null);
   }
 
   if (detail === 'sensor') {
@@ -115,13 +119,7 @@ function App() {
         }
         return <GlycemiaView onShowReports={() => setGlycemiaView('reports')} />;
       case 'meals':
-        return (
-          <PlaceholderView
-            icon="fork"
-            title="Posiłki"
-            description="W przygotowaniu: planowanie posiłków i dawki insuliny."
-          />
-        );
+        return <MealsPage />;
       case 'insulin':
         return (
           <PlaceholderView
