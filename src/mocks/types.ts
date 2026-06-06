@@ -1,5 +1,3 @@
-/** Typy współdzielone przez warstwę mocków i konsumentów. */
-
 export type User = {
   id: string;
   firstName: string;
@@ -10,44 +8,85 @@ export type User = {
 export type GlycemiaTrend = 'up' | 'down' | 'flat';
 
 export type GlycemiaSnapshot = {
-  /** mg/dL */
   value: number;
   trend: GlycemiaTrend;
-  /** Czy obecna wartość jest w przedziale docelowym 70–180 mg/dL. */
   inRange: boolean;
   sensorOnline: boolean;
-  measuredAt: string; // ISO
+  measuredAt: string;
 };
 
 export type GlycemiaPoint = {
-  /** Minuta od początku osi (0–24h*60). */
   minute: number;
-  value: number; // mg/dL
+  value: number;
+};
+
+export type CgmReading = {
+  timestamp: Date;
+  value: number;
+};
+
+export type GlycemiaStats = {
+  tir: number;
+  above: number;
+  below: number;
+  avgGlycemia: number;
+  gmi: number;
+  sampleCount: number;
+};
+
+export type GlycemiaPeriodDays = 1 | 7 | 14 | 30 | 90;
+
+export type AgpBucket = {
+  minute: number;
+  p10: number;
+  p25: number;
+  p50: number;
+  p75: number;
+  p90: number;
+};
+
+export type DailyStat = {
+  date: string;
+  avg: number;
+  tir: number;
+  min: number;
+  max: number;
+};
+
+export type ReportData = {
+  periodDays: number;
+  generatedAt: string;
+  patientName: string;
+  targetMin: number;
+  targetMax: number;
+  stats: GlycemiaStats;
+  agp: AgpBucket[];
+  daily: DailyStat[];
+};
+
+export type RecentReading = {
+  id: string;
+  value: number;
+  time: string;
+  status: 'ok' | 'high' | 'low';
 };
 
 export type DashboardStats = {
-  /** Time-In-Range w % (0–100). */
   tir: number;
-  /** Glucose Management Indicator w %. */
   gmi: number;
-  /** Insulin On Board w jednostkach. */
   iob: number;
 };
 
 export type GlycemiaUnit = 'mg/dL' | 'mmol/L';
 
 export type AccountClinical = {
-  /** Współczynnik węglowodanowy (np. 1:10). */
   icr: string;
-  /** Insulin Sensitivity Factor w mg/dL. */
   isf: number;
-  /** Docelowy zakres glikemii w mg/dL. */
   targetMin: number;
   targetMax: number;
 };
 
 export type CalibrationEntry = {
-  /** Etykieta daty, np. "Dzisiaj, 08:30" */
   label: string;
   source: string;
   value: number;

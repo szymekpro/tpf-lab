@@ -5,10 +5,8 @@ import './Input.css';
 type Props = Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> & {
   label?: string;
   error?: string;
-  /** Zaznacza pole na czerwono bez wyświetlania tekstu błędu. */
   invalid?: boolean;
   iconRight?: ReactNode;
-  /** Dla `type="password"` automatycznie pokazuje przełącznik widoczności hasła. */
   togglePassword?: boolean;
 };
 

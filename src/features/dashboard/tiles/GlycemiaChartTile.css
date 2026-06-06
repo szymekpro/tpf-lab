@@ -1,11 +1,42 @@
 .chart {
   width: 100%;
+  position: relative;
 }
 
 .chart__svg {
   width: 100%;
   height: auto;
   display: block;
+}
+
+.chart__tooltip {
+  position: absolute;
+  transform: translate(-50%, calc(-100% - 10px));
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: var(--sp-1) var(--sp-2);
+  background: var(--surface, #fff);
+  border: 1px solid var(--color-primary-500);
+  border-radius: var(--r-sm, 6px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 2;
+}
+
+.chart__tooltipTime {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.chart__tooltipValue {
+  font-family: var(--font-headline);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-primary-500);
 }
 
 .chart__yLabel,

@@ -45,7 +45,6 @@ export function PrivacyView({ onBack }: Props) {
   return (
     <div className="privacyView">
 
-      {/* Header */}
       <header className="privacyView__header">
         <button type="button" className="privacyView__back" onClick={onBack} aria-label="Wróć">
           <Icon name="arrowRight" size={16} style={{ transform: 'rotate(180deg)' }} />
@@ -55,7 +54,6 @@ export function PrivacyView({ onBack }: Props) {
 
       <div className="privacyView__body">
 
-        {/* Hero */}
         <div className="privacyHero" aria-hidden="true">
           <div className="privacyHero__gradient" />
           <div className="privacyHero__iconWrap">
@@ -64,7 +62,6 @@ export function PrivacyView({ onBack }: Props) {
           <p className="privacyHero__label">Twoje dane są chronione</p>
         </div>
 
-        {/* Lista opcji */}
         <ul className="privacyList">
           {OPTIONS.map((opt) => (
             <li key={opt.title}>
@@ -88,7 +85,6 @@ export function PrivacyView({ onBack }: Props) {
           ))}
         </ul>
 
-        {/* Usuń konto */}
         {!deleteConfirm ? (
           <button
             type="button"
@@ -120,7 +116,6 @@ export function PrivacyView({ onBack }: Props) {
           </div>
         )}
 
-        {/* Privacy hint */}
         <p className="privacyHint">
           Aby dowiedzieć się więcej o tym, jak przetwarzamy Twoje dane, przeczytaj naszą{' '}
           <button type="button" className="privacyHint__link">Politykę Prywatności</button>.

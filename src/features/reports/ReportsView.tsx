@@ -1,23 +1,20 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, Button, Icon } from '../../components';
+import { api } from '../../mocks';
+import type { AgpBucket, GlycemiaPeriodDays, GlycemiaStats } from '../../mocks';
+import { useUnit, convertGlycemia } from '../../contexts/UnitContext';
+import { useGlycemiaTarget } from '../../contexts/GlycemiaTargetContext';
+import { AGP_H, AGP_W, agpBandPath, agpLinePath, agpY } from './agp';
+import { openPrintableReport } from './reportDocument';
 import './ReportsView.css';
 
-type Period = 7 | 14 | 30 | 90;
+type Period = 7 | 14 | 30;
 
 const PERIODS: { id: Period; label: string }[] = [
   { id: 7,  label: '7 dni' },
   { id: 14, label: '14 dni' },
   { id: 30, label: '30 dni' },
-  { id: 90, label: '90 dni' },
 ];
-
-const STATS = {
-  tir: 72,
-  above: 24,
-  below: 4,
-  avgGlycemia: 138,
-  hba1c: 6.4,
-};
 
 const R = 54;
 const CIRC = 2 * Math.PI * R;
@@ -27,30 +24,70 @@ type Props = {
 };
 
 export function ReportsView({ onBack }: Props) {
+  const { unit } = useUnit();
+  const { target } = useGlycemiaTarget();
   const [period, setPeriod] = useState<Period>(14);
+  const [stats, setStats] = useState<GlycemiaStats | null>(null);
+  const [agp, setAgp] = useState<AgpBucket[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [pdfPending, setPdfPending] = useState(false);
 
-  function handleGeneratePdf() {
-    window.print();
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    Promise.all([api.getGlycemiaStats(period), api.getAgpProfile(period)]).then(([next, profile]) => {
+      if (!alive) return;
+      setStats(next);
+      setAgp(profile);
+      setLoading(false);
+    });
+    return () => { alive = false; };
+  }, [period, target.min, target.max]);
+
+  async function handleGeneratePdf() {
+    setPdfPending(true);
+    try {
+      const data = await api.getReportData(period as GlycemiaPeriodDays);
+      openPrintableReport(data, unit);
+    } finally {
+      setPdfPending(false);
+    }
   }
 
   async function handleShare() {
+    if (!stats) return;
     if (navigator.share) {
       try {
         await navigator.share({
           title: 'Raport DiabetCare',
-          text: `Raport glikemii (${period} dni) – TIR: ${STATS.tir}%, Średnia: ${STATS.avgGlycemia} mg/dL`,
+          text: `Raport glikemii (${period} dni) – TIR: ${stats.tir}%, Średnia: ${convertGlycemia(stats.avgGlycemia, unit)} ${unit}`,
         });
       } catch {
-        /* user cancelled */
       }
     } else {
       alert('Udostępnianie niedostępne w tej przeglądarce.');
     }
   }
 
-  const tirLen   = (STATS.tir   / 100) * CIRC;
-  const aboveLen = (STATS.above / 100) * CIRC;
-  const belowLen = (STATS.below / 100) * CIRC;
+  const tir = stats?.tir ?? 0;
+  const above = stats?.above ?? 0;
+  const below = stats?.below ?? 0;
+  const avgGlycemia = stats?.avgGlycemia ?? 0;
+  const hba1c = stats?.gmi ?? 0;
+
+  const avgDisplay = convertGlycemia(avgGlycemia, unit);
+  const targetMinDisp = convertGlycemia(target.min, unit);
+  const targetMaxDisp = convertGlycemia(target.max, unit);
+
+  const agpYMax = agpY(target.max);
+  const agpYMin = agpY(target.min);
+  const agpBandOuter = agpBandPath(agp, 'p90', 'p10');
+  const agpBandInner = agpBandPath(agp, 'p75', 'p25');
+  const agpMedian = agpLinePath(agp, 'p50');
+
+  const tirLen   = (tir   / 100) * CIRC;
+  const aboveLen = (above / 100) * CIRC;
+  const belowLen = (below / 100) * CIRC;
 
   return (
     <div className="reports">
@@ -79,9 +116,7 @@ export function ReportsView({ onBack }: Props) {
         <div className="reports__tirTopRow">
           <div className="reports__tirDonut">
             <svg viewBox="0 0 140 140" className="reports__donutSvg" aria-hidden="true">
-              {/* background ring */}
               <circle cx={70} cy={70} r={R} fill="none" stroke="var(--color-neutral-200)" strokeWidth={16} />
-              {/* below range – red */}
               <circle
                 cx={70} cy={70} r={R}
                 fill="none"
@@ -91,7 +126,6 @@ export function ReportsView({ onBack }: Props) {
                 strokeDashoffset={-(tirLen + aboveLen)}
                 transform="rotate(-90 70 70)"
               />
-              {/* above range – light blue */}
               <circle
                 cx={70} cy={70} r={R}
                 fill="none"
@@ -101,7 +135,6 @@ export function ReportsView({ onBack }: Props) {
                 strokeDashoffset={-tirLen}
                 transform="rotate(-90 70 70)"
               />
-              {/* TIR – green */}
               <circle
                 cx={70} cy={70} r={R}
                 fill="none"
@@ -112,7 +145,7 @@ export function ReportsView({ onBack }: Props) {
               />
             </svg>
             <div className="reports__donutCenter">
-              <span className="reports__donutNumber">{STATS.tir}%</span>
+              <span className="reports__donutNumber">{loading ? '—' : `${tir}%`}</span>
               <span className="reports__donutLabel">W CELU</span>
             </div>
           </div>
@@ -120,18 +153,18 @@ export function ReportsView({ onBack }: Props) {
           <div className="reports__tirLegend">
             <div className="reports__legendRow">
               <span className="reports__legendDot" style={{ background: '#88d982' }} />
-              <span className="reports__legendText">W zakresie (70–180)</span>
-              <span className="reports__legendValue">{STATS.tir}%</span>
+              <span className="reports__legendText">{`W zakresie (${targetMinDisp}–${targetMaxDisp})`}</span>
+              <span className="reports__legendValue">{loading ? '—' : `${tir}%`}</span>
             </div>
             <div className="reports__legendRow">
               <span className="reports__legendDot" style={{ background: '#cbe7f5' }} />
-              <span className="reports__legendText">{`Powyżej (>180)`}</span>
-              <span className="reports__legendValue">{STATS.above}%</span>
+              <span className="reports__legendText">{`Powyżej (>${targetMaxDisp})`}</span>
+              <span className="reports__legendValue">{loading ? '—' : `${above}%`}</span>
             </div>
             <div className="reports__legendRow reports__legendRow--last">
               <span className="reports__legendDot" style={{ background: 'var(--color-danger-500)' }} />
-              <span className="reports__legendText">{`Poniżej (<70)`}</span>
-              <span className="reports__legendValue">{STATS.below}%</span>
+              <span className="reports__legendText">{`Poniżej (<${targetMinDisp})`}</span>
+              <span className="reports__legendValue">{loading ? '—' : `${below}%`}</span>
             </div>
           </div>
         </div>
@@ -140,14 +173,14 @@ export function ReportsView({ onBack }: Props) {
           <div className="reports__statItem">
             <p className="reports__statLabel">ŚREDNIA GLIKEMIA</p>
             <p className="reports__statValue">
-              <strong>{STATS.avgGlycemia}</strong>{' '}
-              <span>mg/dL</span>
+              <strong>{loading ? '—' : avgDisplay}</strong>{' '}
+              <span>{unit}</span>
             </p>
           </div>
           <div className="reports__statItem">
             <p className="reports__statLabel">SZAC. HBA1C</p>
             <p className="reports__statValue">
-              <strong>{STATS.hba1c}</strong>{' '}
+              <strong>{loading ? '—' : hba1c}</strong>{' '}
               <span>%</span>
             </p>
           </div>
@@ -157,34 +190,19 @@ export function ReportsView({ onBack }: Props) {
       <Card className="reports__agpCard">
         <h2 className="reports__agpTitle">
           <Icon name="trend" size={18} className="reports__agpIcon" />
-          Profil AGP
+          Profil AGP ({period} dni)
         </h2>
         <div className="reports__agpChart">
-          <svg viewBox="0 0 300 120" className="reports__agpSvg" aria-label="Profil AGP">
-            {/* Target range zone */}
-            <rect x={0} y={36} width={300} height={48} fill="rgba(136,217,130,0.2)" />
-            <line x1={0} y1={36} x2={300} y2={36} stroke="rgba(136,217,130,0.5)" strokeDasharray="4 4" strokeWidth={1} />
-            <line x1={0} y1={84} x2={300} y2={84} stroke="rgba(136,217,130,0.5)" strokeDasharray="4 4" strokeWidth={1} />
-            {/* IQR band 25–75% */}
-            <path
-              d="M0,70 C30,65 60,55 90,50 C120,45 150,40 180,42 C210,44 240,50 270,55 L270,80 C240,78 210,72 180,68 C150,64 120,62 90,65 C60,68 30,72 0,75 Z"
-              fill="rgba(8,126,139,0.1)"
-            />
-            {/* 10/90 percentile dashed */}
-            <path
-              d="M0,62 C30,56 60,44 90,38 C120,32 150,28 180,30 C210,32 240,40 270,46"
-              fill="none" stroke="rgba(8,126,139,0.3)" strokeWidth={1} strokeDasharray="3 3"
-            />
-            <path
-              d="M0,82 C30,80 60,74 90,72 C120,70 150,66 180,68 C210,70 240,74 270,78"
-              fill="none" stroke="rgba(8,126,139,0.3)" strokeWidth={1} strokeDasharray="3 3"
-            />
-            {/* Median */}
-            <path
-              d="M0,72 C30,68 60,58 90,54 C120,50 150,46 180,48 C210,50 240,56 270,62"
-              fill="none" stroke="var(--color-primary-500)" strokeWidth={2.5}
-              strokeLinecap="round" strokeLinejoin="round"
-            />
+          <svg viewBox={`0 0 ${AGP_W} ${AGP_H}`} className="reports__agpSvg" preserveAspectRatio="none" aria-label={`Profil AGP z ${period} dni`}>
+            <rect x={0} y={agpYMax} width={AGP_W} height={agpYMin - agpYMax} fill="rgba(136,217,130,0.2)" />
+            <line x1={0} y1={agpYMax} x2={AGP_W} y2={agpYMax} stroke="rgba(136,217,130,0.5)" strokeDasharray="4 4" strokeWidth={1} />
+            <line x1={0} y1={agpYMin} x2={AGP_W} y2={agpYMin} stroke="rgba(136,217,130,0.5)" strokeDasharray="4 4" strokeWidth={1} />
+            {agpBandOuter && <path d={agpBandOuter} fill="rgba(8,126,139,0.12)" />}
+            {agpBandInner && <path d={agpBandInner} fill="rgba(8,126,139,0.25)" />}
+            {agpMedian && (
+              <path d={agpMedian} fill="none" stroke="var(--color-primary-500)" strokeWidth={2}
+                strokeLinecap="round" strokeLinejoin="round" />
+            )}
           </svg>
           <div className="reports__agpXLabels" aria-hidden="true">
             <span>00:00</span>
@@ -194,15 +212,21 @@ export function ReportsView({ onBack }: Props) {
             <span>24:00</span>
           </div>
         </div>
+        <div className="reports__agpLegend">
+          <span className="reports__legendItem"><i className="reports__legendSwatch" style={{ background: 'var(--color-primary-500)' }} /> Mediana</span>
+          <span className="reports__legendItem"><i className="reports__legendSwatch" style={{ background: 'rgba(8,126,139,0.25)' }} /> 25–75%</span>
+          <span className="reports__legendItem"><i className="reports__legendSwatch" style={{ background: 'rgba(8,126,139,0.12)' }} /> 10–90%</span>
+        </div>
       </Card>
 
       <div className="reports__actions">
         <Button
           fullWidth
           onClick={handleGeneratePdf}
+          disabled={pdfPending}
           iconLeft={<Icon name="database" size={18} />}
         >
-          Generuj PDF
+          {pdfPending ? 'Generowanie…' : 'Generuj PDF'}
         </Button>
         <Button
           fullWidth

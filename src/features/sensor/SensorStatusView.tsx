@@ -49,7 +49,6 @@ export function SensorStatusView({ onBack }: Props) {
     const val = Number(calibValue);
     if (!calibValue || isNaN(val)) return;
 
-    // Przelicz do mg/dL jeśli użytkownik wpisał mmol/L
     const valMgdl = unit === 'mmol/L' ? Math.round(val / 0.0555) : val;
     if (valMgdl < 40 || valMgdl > 400) return;
 
@@ -61,7 +60,7 @@ export function SensorStatusView({ onBack }: Props) {
       const newEntry: CalibrationEntry = {
         label: formatNowLabel(),
         source: 'Glukometr',
-        value: val,         // zapisujemy w jednostce użytkownika
+        value: val,
       };
       setHistory(prev => [newEntry, ...prev]);
       setCalibValue('');
@@ -76,7 +75,6 @@ export function SensorStatusView({ onBack }: Props) {
   return (
     <div className="sensorView">
 
-      {/* Header */}
       <header className="sensorView__header">
         <button type="button" className="sensorView__back" onClick={onBack} aria-label="Wróć">
           <Icon name="arrowRight" size={16} style={{ transform: 'rotate(180deg)' }} />
@@ -86,7 +84,6 @@ export function SensorStatusView({ onBack }: Props) {
 
       <div className="sensorView__body">
 
-        {/* Karta statusu */}
         <div className="sensorCard">
           <div className="sensorCard__bg" aria-hidden="true" />
           <div className="sensorCard__row">
@@ -111,7 +108,6 @@ export function SensorStatusView({ onBack }: Props) {
           </div>
         </div>
 
-        {/* Kalibracja */}
         <section className="sensorSection">
           <div className="sensorSection__heading">
             <Icon name="edit" size={18} />
@@ -146,7 +142,6 @@ export function SensorStatusView({ onBack }: Props) {
           </form>
         </section>
 
-        {/* Historia kalibracji */}
         <section className="sensorSection">
           <h2 className="sensorSection__historyTitle">Historia kalibracji</h2>
           <ul className="sensorHistory">
@@ -174,7 +169,6 @@ export function SensorStatusView({ onBack }: Props) {
           )}
         </section>
 
-        {/* Instrukcja parowania */}
         <section className="sensorSection">
           <div className="sensorSection__headingBordered">
             <Icon name="bluetooth" size={18} />

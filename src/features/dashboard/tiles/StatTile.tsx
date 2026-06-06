@@ -13,10 +13,6 @@ type StatConfig = {
   format: (n: number) => string;
 };
 
-/**
- * Helper – tworzy gotową definicję kafelka dla pojedynczej metryki ze statystyk.
- * Dzięki temu dodanie nowego "small stat" = jedno wywołanie helpera.
- */
 function makeStatTile(cfg: StatConfig): TileDefinition {
   function StatTileImpl() {
     const [stats, setStats] = useState<DashboardStats | null>(null);

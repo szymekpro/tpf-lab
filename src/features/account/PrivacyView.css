@@ -5,7 +5,6 @@
   background: var(--bg-app);
 }
 
-/* Header */
 .privacyView__header {
   display: flex;
   align-items: center;
@@ -44,7 +43,6 @@
   margin: 0;
 }
 
-/* Body */
 .privacyView__body {
   display: flex;
   flex-direction: column;
@@ -52,7 +50,6 @@
   padding: var(--sp-5) var(--sp-5) calc(80px + var(--sp-6));
 }
 
-/* Hero */
 .privacyHero {
   position: relative;
   height: 160px;
@@ -99,7 +96,6 @@
   margin: 0;
 }
 
-/* Options list */
 .privacyList {
   list-style: none;
   margin: 0;
@@ -168,7 +164,6 @@
   flex-shrink: 0;
 }
 
-/* Delete account */
 .privacyDelete {
   display: flex;
   align-items: center;
@@ -258,7 +253,6 @@
 }
 .privacyDelete__confirm:hover { background: #9b1515; }
 
-/* Privacy hint */
 .privacyHint {
   text-align: center;
   font-size: 14px;

@@ -1,9 +1,3 @@
-/**
- * Design tokens – jedyne źródło prawdy dla wartości używanych w TS
- * (np. inline style, kolory na canvas/SVG). Klasy CSS używają zmiennych
- * z `index.css`, więc tu trzymamy paralele tylko dla scenariuszy,
- * w których styl wyrażamy w JS.
- */
 export const colors = {
   primary: {
     50: '#E1F2F4',

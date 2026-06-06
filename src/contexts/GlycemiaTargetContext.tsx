@@ -3,9 +3,7 @@ import { createContext, useContext, useState, useCallback, type ReactNode } from
 const STORAGE_KEY = 'diabetcare_target';
 
 export type GlycemiaTarget = {
-  /** mg/dL */
   min: number;
-  /** mg/dL */
   max: number;
 };
 
@@ -21,7 +19,7 @@ function loadTarget(): GlycemiaTarget {
     if (isFinite(min) && isFinite(max) && min > 0 && max > min) {
       return { min, max };
     }
-  } catch { /* ignore */ }
+  } catch { }
   return DEFAULT_TARGET;
 }
 
@@ -40,7 +38,7 @@ export function GlycemiaTargetProvider({ children }: { children: ReactNode }) {
 
   const setTarget = useCallback((t: GlycemiaTarget) => {
     _setTarget(t);
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(t)); } catch { /* ignore */ }
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(t)); } catch { }
   }, []);
 
   return (

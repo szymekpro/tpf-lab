@@ -6,7 +6,6 @@
   padding-bottom: calc(72px + var(--sp-6));
 }
 
-/* Header */
 .glycemia__header h1 {
   font-size: var(--fs-h1);
   font-weight: 800;
@@ -19,7 +18,6 @@
   margin: 0;
 }
 
-/* Range pills */
 .glycemia__rangeScroll {
   display: flex;
   gap: var(--sp-2);
@@ -52,7 +50,6 @@
   color: #fff;
 }
 
-/* Bento grid */
 .glycemia__bento {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -78,7 +75,6 @@
   pointer-events: none;
 }
 
-/* TIR card internals */
 .glycemia__tirRow {
   display: flex;
   align-items: center;
@@ -140,7 +136,6 @@
   margin: 0;
 }
 
-/* Stat cards */
 .glycemia__statCard {
   display: flex;
   flex-direction: column;
@@ -178,7 +173,6 @@
   margin: 0;
 }
 
-/* Chart */
 .glycemia__chartTitle {
   font-size: var(--fs-h3);
   font-weight: 700;
@@ -207,12 +201,43 @@
 .glycemia__svgContainer {
   flex: 1;
   min-width: 0;
+  position: relative;
+}
+
+.glycemia__tooltip {
+  position: absolute;
+  transform: translate(-50%, calc(-100% - 10px));
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: var(--sp-1) var(--sp-2);
+  background: var(--surface, #fff);
+  border: 1px solid var(--color-primary-500);
+  border-radius: var(--r-sm, 6px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 2;
+}
+
+.glycemia__tooltipTime {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.glycemia__tooltipValue {
+  font-family: var(--font-headline);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-primary-500);
 }
 
 .glycemia__svg {
   display: block;
   width: 100%;
-  height: 200px;
+  height: 280px;
 }
 
 .glycemia__xLabels {
@@ -224,7 +249,6 @@
   color: var(--text-secondary);
 }
 
-/* Recent readings */
 .glycemia__section {
   display: flex;
   flex-direction: column;
@@ -295,7 +319,6 @@
   background: rgba(8, 126, 139, 0.06);
 }
 
-/* Actions */
 .glycemia__actions {
   padding-bottom: var(--sp-2);
 }

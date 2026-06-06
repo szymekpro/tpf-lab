@@ -3,7 +3,7 @@
   flex-direction: column;
   gap: var(--sp-5);
   padding: var(--sp-5);
-  padding-bottom: calc(72px + var(--sp-6));  /* miejsce na bottom nav */
+  padding-bottom: calc(72px + var(--sp-6));
 }
 
 .dashboard__greeting h1 {
@@ -28,7 +28,6 @@
 .dashboard__cell--span-4  { grid-column: span 4; }
 
 @media (max-width: 480px) {
-  /* Na bardzo wąskich ekranach „4-kolumnowe" kafelki nadal mieszczą się w jednym rzędzie. */
   .dashboard__cell--span-8,
   .dashboard__cell--span-6 { grid-column: span 12; }
 }
