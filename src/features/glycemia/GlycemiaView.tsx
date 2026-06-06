@@ -315,6 +315,15 @@ export function GlycemiaView({ onShowReports }: Props) {
               Pokaż więcej historii
             </button>
           )}
+          {recentCount > 3 && (
+            <button
+              type="button"
+              className="glycemia__showMore"
+              onClick={() => setRecentCount(3)}
+            >
+              Zwiń
+            </button>
+          )}
         </Card>
       </section>
 

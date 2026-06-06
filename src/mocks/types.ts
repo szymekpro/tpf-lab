@@ -45,6 +45,14 @@ export type AgpBucket = {
   p90: number;
 };
 
+export type AlarmEvent = {
+  id: string;
+  title: string;
+  time: string;
+  value: number;
+  tone: 'low' | 'high';
+};
+
 export type DailyStat = {
   date: string;
   avg: number;

@@ -1,4 +1,4 @@
-import type { AgpBucket, CgmReading, DailyStat, GlycemiaPoint, GlycemiaStats } from './types';
+import type { AgpBucket, AlarmEvent, CgmReading, DailyStat, GlycemiaPoint, GlycemiaStats } from './types';
 
 const TARGET_MIN = 70;
 const TARGET_MAX = 180;
@@ -40,6 +40,13 @@ export function filterByDays(readings: CgmReading[], days: number): CgmReading[]
   if (!readings.length) return [];
   const endMs = readings.at(-1)!.timestamp.getTime();
   const startMs = endMs - days * 24 * 60 * 60 * 1000;
+  return readings.filter(r => r.timestamp.getTime() >= startMs);
+}
+
+export function filterByHours(readings: CgmReading[], hours: number): CgmReading[] {
+  if (!readings.length) return [];
+  const endMs = readings.at(-1)!.timestamp.getTime();
+  const startMs = endMs - hours * 60 * 60 * 1000;
   return readings.filter(r => r.timestamp.getTime() >= startMs);
 }
 
@@ -161,6 +168,67 @@ export function computeDailyBreakdown(
       } as DailyStat & { _sortKey: string };
     })
     .map(({ _sortKey, ...rest }) => rest);
+}
+
+const CRITICAL_LOW = 55;
+
+/**
+ * Wykrywa epizody alarmowe w danych CGM względem progów `low`/`high`.
+ * Kolejne odczyty poza zakresem traktowane są jako jeden epizod; zapisywany jest
+ * skrajny punkt (minimum dla hipo, maksimum dla hiper) i jego czas.
+ * Zwraca najnowsze epizody jako pierwsze.
+ */
+export function computeAlarmEvents(
+  readings: CgmReading[],
+  low: number,
+  high: number,
+  maxEvents = 8,
+): AlarmEvent[] {
+  const now = readings.at(-1)?.timestamp ?? new Date();
+  const events: AlarmEvent[] = [];
+
+  let active: 'low' | 'high' | null = null;
+  let extremeVal = 0;
+  let extremeAt = now;
+
+  const flush = () => {
+    if (!active) return;
+    const tone = active;
+    const title =
+      tone === 'low'
+        ? extremeVal < CRITICAL_LOW
+          ? 'Krytycznie niski poziom'
+          : 'Niski poziom glikemii'
+        : 'Wysoki poziom glikemii';
+    events.push({
+      id: `${extremeAt.getTime()}`,
+      title,
+      time: formatReadingTime(extremeAt, now),
+      value: Math.round(extremeVal),
+      tone,
+    });
+    active = null;
+  };
+
+  for (const r of readings) {
+    const zone: 'low' | 'high' | null = r.value < low ? 'low' : r.value > high ? 'high' : null;
+    if (zone === null) {
+      flush();
+      continue;
+    }
+    if (active !== zone) {
+      flush();
+      active = zone;
+      extremeVal = r.value;
+      extremeAt = r.timestamp;
+    } else if ((zone === 'low' && r.value < extremeVal) || (zone === 'high' && r.value > extremeVal)) {
+      extremeVal = r.value;
+      extremeAt = r.timestamp;
+    }
+  }
+  flush();
+
+  return events.reverse().slice(0, maxEvents);
 }
 
 function formatReadingTime(date: Date, now: Date): string {

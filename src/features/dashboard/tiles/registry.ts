@@ -5,10 +5,10 @@ import { glycemiaChartTile } from './GlycemiaChartTile';
 
 export const DASHBOARD_TILES: ReadonlyArray<TileDefinition> = [
   glycemiaHeroTile,
+  glycemiaChartTile,
   tirTile,
   gmiTile,
   iobTile,
-  glycemiaChartTile,
 ];
 
 export function getOrderedTiles(): TileDefinition[] {

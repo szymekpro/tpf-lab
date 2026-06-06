@@ -15,31 +15,33 @@ const PAD_B = 32;
 const Y_MIN = 40;
 const Y_MAX = 280;
 
-function zoneColor(a: number, b: number, min: number, max: number): string {
-  if (a < min || b < min) return 'var(--color-danger-500)';
-  if (a > max || b > max) return 'var(--color-warning-500)';
+const RANGES = [3, 12, 24] as const;
+type RangeHours = (typeof RANGES)[number];
+
+function dotColor(v: number, min: number, max: number): string {
+  if (v < min) return 'var(--color-danger-500)';
+  if (v > max) return 'var(--color-warning-500)';
   return 'var(--color-tertiary-500)';
 }
 
-function formatMinute(minute: number): string {
-  const total = Math.round(minute);
-  const h = Math.floor(total / 60) % 24;
-  const m = ((total % 60) + 60) % 60;
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+function formatClock(d: Date): string {
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
 function project(points: GlycemiaPoint[]) {
   const innerW = W - PAD_L - PAD_R;
   const innerH = H - PAD_T - PAD_B;
-  const lastMin = points.at(-1)?.minute ?? 24 * 60;
+  const lastMin = points.at(-1)?.minute ?? 1;
+  const span = lastMin || 1;
   return points.map(p => {
-    const x = PAD_L + (p.minute / lastMin) * innerW;
+    const x = PAD_L + (p.minute / span) * innerW;
     const y = PAD_T + (1 - (p.value - Y_MIN) / (Y_MAX - Y_MIN)) * innerH;
     return { x, y };
   });
 }
 
 function GlycemiaChart() {
+  const [hours, setHours] = useState<RangeHours>(24);
   const [points, setPoints] = useState<GlycemiaPoint[] | null>(null);
   const [hover, setHover] = useState<number | null>(null);
   const { unit } = useUnit();
@@ -47,23 +49,16 @@ function GlycemiaChart() {
 
   useEffect(() => {
     let alive = true;
-    api.getGlycemia24h().then(p => alive && setPoints(p));
+    setPoints(null);
+    setHover(null);
+    api.getGlycemiaWindow(hours).then(p => alive && setPoints(p));
     return () => { alive = false; };
-  }, []);
+  }, [hours]);
 
-  const { proj, segments, areaPath } = useMemo(() => {
-    if (!points || !points.length) return { proj: [], segments: [], areaPath: '' };
-    const pr = project(points);
-    const segs = pr.slice(0, -1).map((p, i) => ({
-      key: i,
-      d: `M${p.x.toFixed(1)} ${p.y.toFixed(1)} L${pr[i + 1].x.toFixed(1)} ${pr[i + 1].y.toFixed(1)}`,
-      color: zoneColor(points[i].value, points[i + 1].value, target.min, target.max),
-    }));
-    const line = pr.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
-    const bottomY = (H - PAD_B).toFixed(1);
-    const area = `${line} L${pr.at(-1)!.x.toFixed(1)} ${bottomY} L${pr[0].x.toFixed(1)} ${bottomY} Z`;
-    return { proj: pr, segments: segs, areaPath: area };
-  }, [points, target.min, target.max]);
+  const proj = useMemo(() => (points && points.length ? project(points) : []), [points]);
+
+  const lastMin = points?.at(-1)?.minute ?? 0;
+  const nowMs = useMemo(() => Date.now(), [points]);
 
   function handleMove(e: MouseEvent<SVGSVGElement>) {
     if (!proj.length) return;
@@ -82,22 +77,46 @@ function GlycemiaChart() {
   const hoverData = hover != null && points ? points[hover] : null;
 
   const innerH = H - PAD_T - PAD_B;
-  const yTop    = PAD_T + (1 - (target.max - Y_MIN) / (Y_MAX - Y_MIN)) * innerH;
-  const yBot    = PAD_T + (1 - (target.min - Y_MIN) / (Y_MAX - Y_MIN)) * innerH;
+  const yTop = PAD_T + (1 - (target.max - Y_MIN) / (Y_MAX - Y_MIN)) * innerH;
+  const yBot = PAD_T + (1 - (target.min - Y_MIN) / (Y_MAX - Y_MIN)) * innerH;
 
   const yTicksMgdl = [target.min, target.max, 250].filter((v, i, a) => a.indexOf(v) === i).sort((a, b) => a - b);
-  const xTicks = [0, 6, 12, 18];
   const chartBottomY = H - PAD_B;
 
+  const xTicks = useMemo(() => {
+    if (!lastMin) return [];
+    const steps = hours <= 3 ? 3 : 4;
+    const innerW = W - PAD_L - PAD_R;
+    return Array.from({ length: steps + 1 }, (_, i) => {
+      const m = (lastMin * i) / steps;
+      const x = PAD_L + (m / lastMin) * innerW;
+      const label = i === steps ? 'Teraz' : formatClock(new Date(nowMs - (lastMin - m) * 60_000));
+      return { x, label };
+    });
+  }, [lastMin, hours, nowMs]);
+
   return (
-    <Card title="Glikemia (24h)">
+    <Card title="Glikemia">
+      <div className="chart__ranges" role="group" aria-label="Zakres czasu wykresu">
+        {RANGES.map(h => (
+          <button
+            key={h}
+            type="button"
+            className={`chart__range${h === hours ? ' chart__range--active' : ''}`}
+            aria-pressed={h === hours}
+            onClick={() => setHours(h)}
+          >
+            {h}h
+          </button>
+        ))}
+      </div>
       <div className="chart">
         <svg
           viewBox={`0 0 ${W} ${H}`}
           preserveAspectRatio="none"
           className="chart__svg"
           role="img"
-          aria-label="Wykres glikemii w ciągu 24 godzin"
+          aria-label={`Wykres glikemii z ostatnich ${hours} godzin`}
           onMouseMove={handleMove}
           onMouseLeave={() => setHover(null)}
         >
@@ -110,9 +129,6 @@ function GlycemiaChart() {
             opacity={0.5}
           />
 
-          {areaPath && (
-            <path d={areaPath} fill="var(--color-tertiary-100)" opacity={0.55} />
-          )}
           {yTicksMgdl.map(v => {
             const y = PAD_T + (1 - (v - Y_MIN) / (Y_MAX - Y_MIN)) * innerH;
             const label = convertGlycemia(v, unit);
@@ -124,25 +140,19 @@ function GlycemiaChart() {
             );
           })}
           <text x={PAD_L - 8} y={chartBottomY + 4} textAnchor="end" className="chart__yLabel">0</text>
-          {xTicks.map(h => {
-            const x = PAD_L + (h / 24) * (W - PAD_L - PAD_R);
-            return (
-              <text key={`x-${h}`} x={x} y={H - 10} textAnchor="middle" className="chart__xLabel">
-                {h.toString().padStart(2, '0')}:00
-              </text>
-            );
-          })}
-          <text x={W - PAD_R} y={H - 10} textAnchor="end" className="chart__xLabel">Teraz</text>
+          {xTicks.map((t, i) => (
+            <text key={`x-${i}`} x={t.x} y={H - 10} textAnchor={i === 0 ? 'start' : i === xTicks.length - 1 ? 'end' : 'middle'} className="chart__xLabel">
+              {t.label}
+            </text>
+          ))}
 
-          {segments.map(s => (
-            <path
-              key={s.key}
-              d={s.d}
-              fill="none"
-              stroke={s.color}
-              strokeWidth={2.5}
-              strokeLinejoin="round"
-              strokeLinecap="round"
+          {proj.map((p, i) => (
+            <circle
+              key={i}
+              cx={p.x}
+              cy={p.y}
+              r={2.4}
+              fill={dotColor(points![i].value, target.min, target.max)}
             />
           ))}
 
@@ -158,7 +168,7 @@ function GlycemiaChart() {
                 strokeDasharray="3 3"
                 opacity={0.6}
               />
-              <circle cx={hoverPoint.x} cy={hoverPoint.y} r={4} fill="var(--color-primary-500)" stroke="#fff" strokeWidth={1.5} />
+              <circle cx={hoverPoint.x} cy={hoverPoint.y} r={4.5} fill="var(--color-primary-500)" stroke="#fff" strokeWidth={1.5} />
             </>
           )}
         </svg>
@@ -171,7 +181,7 @@ function GlycemiaChart() {
               top: `${(hoverPoint.y / H) * 100}%`,
             }}
           >
-            <span className="chart__tooltipTime">{formatMinute(hoverData.minute)}</span>
+            <span className="chart__tooltipTime">{formatClock(new Date(nowMs - (lastMin - hoverData.minute) * 60_000))}</span>
             <span className="chart__tooltipValue">{convertGlycemia(hoverData.value, unit)} {unit}</span>
           </div>
         )}
@@ -183,6 +193,6 @@ function GlycemiaChart() {
 export const glycemiaChartTile: TileDefinition = {
   id: 'glycemia-chart',
   span: 12,
-  priority: 30,
+  priority: 15,
   Component: GlycemiaChart,
 };

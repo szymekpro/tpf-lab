@@ -1,6 +1,7 @@
 import type {
   AccountProfile,
   AgpBucket,
+  AlarmEvent,
   DashboardStats,
   GlycemiaPeriodDays,
   GlycemiaPoint,
@@ -13,9 +14,11 @@ import type {
 } from './types';
 import {
   computeAgpProfile,
+  computeAlarmEvents,
   computeDailyBreakdown,
   computeStats,
   filterByDays,
+  filterByHours,
   getRecentReadings,
   loadCgmData,
   to24hPoints,
@@ -196,6 +199,12 @@ export async function getRecentGlycemiaReadings(count = 3, strideMin = 30): Prom
   return getRecentReadings(all, count, strideMin, min, max);
 }
 
+export async function getAlarmEvents(low: number, high: number, maxEvents = 50): Promise<AlarmEvent[]> {
+  await delay(150);
+  const all = await loadCgmData();
+  return computeAlarmEvents(all, low, high, maxEvents);
+}
+
 export async function getAgpProfile(days: GlycemiaPeriodDays): Promise<AgpBucket[]> {
   await delay(180);
   const all = await loadCgmData();
@@ -240,5 +249,19 @@ export async function getSensorStatus(): Promise<SensorStatus> {
 
 export async function getGlycemia24h(): Promise<GlycemiaPoint[]> {
   const { points } = await getGlycemiaChart(1);
+  return points;
+}
+
+export async function getGlycemiaWindow(hours: number): Promise<GlycemiaPoint[]> {
+  await delay(150);
+  const all = await loadCgmData();
+  const slice = filterByHours(all, hours);
+  const points = to24hPoints(slice);
+  if (points.length) {
+    points[points.length - 1] = {
+      minute: points[points.length - 1].minute,
+      value: await getLatestReadingValue(),
+    };
+  }
   return points;
 }

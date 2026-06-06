@@ -9,6 +9,7 @@ import { GlycemiaTargetEditView } from './features/account/GlycemiaTargetEditVie
 import { PrivacyView } from './features/account/PrivacyView';
 import { GlycemiaView } from './features/glycemia/GlycemiaView';
 import { ReportsView } from './features/reports/ReportsView';
+import { AlarmsView } from './features/alarms/AlarmsView';
 import { RegisterView } from './features/login/RegisterView';
 import { ForgotPasswordView } from './features/login/ForgotPasswordView';
 import type { User } from './mocks';
@@ -92,6 +93,14 @@ function App() {
     );
   }
 
+  if (detail === 'alarms') {
+    return (
+      <AppShell active={active} onChange={(r) => { setActive(r); setDetail(null); }}>
+        <AlarmsView onBack={() => setDetail(null)} />
+      </AppShell>
+    );
+  }
+
   const ctx = { user, onNavigate: (r: DetailRoute) => setDetail(r) };
 
   const content = (() => {
@@ -99,7 +108,7 @@ function App() {
       case 'home':
         return <DashboardView ctx={ctx} />;
       case 'account':
-        return <AccountView user={user} onLogout={handleLogout} onEditTarget={() => setDetail('edit-target')} onPrivacy={() => setDetail('privacy')} />;
+        return <AccountView user={user} onLogout={handleLogout} onEditTarget={() => setDetail('edit-target')} onPrivacy={() => setDetail('privacy')} onAlarms={() => setDetail('alarms')} />;
       case 'glycemia':
         if (glycemiaView === 'reports') {
           return <ReportsView onBack={() => setGlycemiaView('main')} />;
