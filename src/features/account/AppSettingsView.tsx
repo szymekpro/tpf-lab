@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Icon, type IconName } from '../../components';
 import { useTheme } from '../../contexts/theme';
+import { trackEvent } from '../../lib/analytics';
 import './AppSettingsView.css';
 
 type Props = {
@@ -36,12 +37,33 @@ export function AppSettingsView({ onBack }: Props) {
   const language = LANGUAGES[languageIndex];
 
   function toggleLanguage() {
-    setLanguageIndex(index => (index + 1) % LANGUAGES.length);
+    setLanguageIndex(index => {
+      const nextIndex = (index + 1) % LANGUAGES.length;
+      void trackEvent('change_language', { language: LANGUAGES[nextIndex].code });
+      return nextIndex;
+    });
   }
 
   function syncNow() {
+    void trackEvent('sync_data', { source: 'app_settings' });
     setLastSync('teraz');
     window.setTimeout(() => setLastSync('przed chwilą'), 1800);
+  }
+
+  function toggleDarkMode() {
+    const nextDarkMode = !darkMode;
+    setDarkMode(nextDarkMode);
+    void trackEvent('toggle_dark_mode', { enabled: nextDarkMode });
+  }
+
+  function toggleHelpCenter() {
+    setHelpOpen(open => {
+      const nextOpen = !open;
+      void trackEvent(nextOpen ? 'open_help_center' : 'close_help_center', {
+        source: 'app_settings',
+      });
+      return nextOpen;
+    });
   }
 
   return (
@@ -70,7 +92,7 @@ export function AppSettingsView({ onBack }: Props) {
               subtitle={darkMode ? 'Włączony' : 'Dostosuj do systemu'}
               action="switch"
               checked={darkMode}
-              onClick={() => setDarkMode(!darkMode)}
+              onClick={toggleDarkMode}
             />
           </div>
         </section>
@@ -108,7 +130,7 @@ export function AppSettingsView({ onBack }: Props) {
           <button
             type="button"
             className="appSettingsHelp__button"
-            onClick={() => setHelpOpen(open => !open)}
+            onClick={toggleHelpCenter}
             aria-expanded={helpOpen}
           >
             {helpOpen ? 'Ukryj informacje' : 'Centrum Pomocy'}
