@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { AppShell, type AppRoute } from './layouts/AppShell';
 import { DashboardView } from './features/dashboard/DashboardView';
 import { LoginView } from './features/login/LoginView';
-import { PlaceholderView } from './features/placeholder/PlaceholderView';
+//import { PlaceholderView } from './features/placeholder/PlaceholderView';
 import { AccountView } from './features/account/AccountView';
 import { SensorStatusView } from './features/sensor/SensorStatusView';
 import { GlycemiaTargetEditView } from './features/account/GlycemiaTargetEditView';
@@ -16,6 +16,7 @@ import { ForgotPasswordView } from './features/login/ForgotPasswordView';
 import type { User } from './mocks';
 import { firebaseLogout, onAuthChanged } from './lib/auth';
 import type { DetailRoute } from './features/dashboard/tiles/types';
+import { InsulinView } from './features/insulin/InsulinView';
 
 function App() {
   const [active, setActive] = useState<AppRoute>('home');
@@ -121,13 +122,7 @@ function App() {
       case 'meals':
         return <MealsPage />;
       case 'insulin':
-        return (
-          <PlaceholderView
-            icon="syringe"
-            title="Insulina"
-            description="Kalkulator bolusa i harmonogram podań."
-          />
-        );
+  return <InsulinView />;
       default:
         return <DashboardView ctx={ctx} />;
     }

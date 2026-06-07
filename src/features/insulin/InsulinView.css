@@ -1,0 +1,299 @@
+.insulin {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: var(--sp-5);
+  padding-bottom: calc(72px + var(--sp-6));
+}
+
+.insulin__header h1 {
+  margin: 0;
+  font-size: var(--fs-h1);
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.insulin__card,
+.insulin__doseCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.insulin__card {
+  padding: var(--sp-4);
+}
+
+.insulin__eyebrow {
+  margin: 0 0 var(--sp-3);
+  font-family: var(--font-headline);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.insulin__glucoseRow {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.insulin__glucoseRow strong {
+  font-family: var(--font-headline);
+  font-size: 36px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--text-primary);
+}
+
+.insulin__glucoseRow span {
+  font-size: var(--fs-body);
+  color: var(--text-secondary);
+}
+
+.insulin__activeCard {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  background: #d9edf8;
+  border: 1px solid #b4d6ea;
+  border-radius: var(--r-md);
+  color: var(--text-secondary);
+}
+
+.insulin__activeCard p {
+  margin: 0;
+  font-size: var(--fs-body);
+}
+
+.insulin__activeCard strong {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.insulin__activeIcon {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  font-size: 15px;
+  color: var(--color-primary-700);
+}
+
+.insulin__search {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: 12px 14px;
+  margin-bottom: var(--sp-4);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-md);
+}
+
+.insulin__search:focus-within {
+  border-color: var(--color-primary-300);
+  box-shadow: 0 0 0 3px rgba(84, 179, 192, 0.16);
+}
+
+.insulin__searchIcon {
+  font-size: 18px;
+  color: var(--text-muted);
+  line-height: 1;
+}
+
+.insulin__search input {
+  width: 100%;
+  padding: 0;
+  font: inherit;
+  font-size: var(--fs-body);
+  color: var(--text-primary);
+  background: transparent;
+  border: 0;
+  outline: 0;
+}
+
+.insulin__search input::placeholder {
+  color: var(--text-muted);
+}
+
+.insulin__counters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-3);
+}
+
+.insulin__counterBox {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.insulin__counterLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.insulin__stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  padding: 6px;
+  background: var(--color-neutral-50);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-md);
+}
+
+.insulin__stepper button {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  padding: 0;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--text-secondary);
+  background: var(--color-neutral-100);
+  border: 0;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.insulin__stepper button:hover {
+  background: var(--color-neutral-200);
+}
+
+.insulin__stepper strong {
+  min-width: 42px;
+  text-align: center;
+  font-family: var(--font-headline);
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.insulin__doseCard {
+  padding: var(--sp-5) var(--sp-4);
+  background: var(--color-primary-500);
+  border-color: transparent;
+  color: var(--text-inverse);
+}
+
+.insulin__doseTitle {
+  margin: 0 0 var(--sp-3);
+  font-family: var(--font-headline);
+  font-size: var(--fs-small);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.92);
+  text-align: center;
+}
+
+.insulin__doseValue {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: var(--sp-4);
+}
+
+.insulin__doseValue strong {
+  font-family: var(--font-headline);
+  font-size: 72px;
+  font-weight: 800;
+  line-height: 0.95;
+  color: var(--text-inverse);
+}
+
+.insulin__doseValue span {
+  margin-bottom: 10px;
+  font-family: var(--font-headline);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-inverse);
+}
+
+.insulin__doseDetails {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding-top: var(--sp-3);
+  border-top: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.insulin__doseDetails div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.insulin__doseDetails span {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.insulin__doseDetails strong {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-inverse);
+}
+
+.insulin__saveButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 52px;
+  padding: 0 var(--sp-4);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  color: var(--text-inverse);
+  background: var(--color-primary-700);
+  border: 0;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.insulin__saveButton:hover {
+  background: var(--color-primary-500);
+}
+
+.insulin__saveIcon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+@media (max-width: 420px) {
+  .insulin {
+    padding-right: var(--sp-4);
+    padding-left: var(--sp-4);
+  }
+
+  .insulin__counters {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-2);
+  }
+
+  .insulin__stepper strong {
+    font-size: 24px;
+  }
+
+  .insulin__doseValue strong {
+    font-size: 60px;
+  }
+
+  .insulin__doseValue span {
+    font-size: 24px;
+  }
+}
