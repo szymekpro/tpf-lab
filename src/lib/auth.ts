@@ -4,10 +4,16 @@ import {
   sendPasswordResetEmail,
   signOut,
   onAuthStateChanged,
+  updatePassword,
+  deleteUser,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
   type User as FirebaseUser,
 } from 'firebase/auth';
 import { auth } from './firebase';
 import type { User } from '../mocks';
+
+type EmailFirebaseUser = FirebaseUser & { email: string };
 
 function toAppUser(fb: FirebaseUser): User {
   const displayName = fb.displayName ?? '';
@@ -36,6 +42,34 @@ export async function firebaseResetPassword(email: string): Promise<void> {
 
 export async function firebaseLogout(): Promise<void> {
   await signOut(auth);
+}
+
+function getCurrentEmailUser(): EmailFirebaseUser {
+  const user = auth.currentUser;
+  if (!user || !user.email) {
+    throw new Error('Brak aktywnej sesji użytkownika.');
+  }
+  return user as EmailFirebaseUser;
+}
+
+async function reauthenticateWithPassword(currentPassword: string): Promise<FirebaseUser> {
+  const user = getCurrentEmailUser();
+  const credential = EmailAuthProvider.credential(user.email, currentPassword);
+  await reauthenticateWithCredential(user, credential);
+  return user;
+}
+
+export async function firebaseChangePassword(
+  currentPassword: string,
+  newPassword: string,
+): Promise<void> {
+  const user = await reauthenticateWithPassword(currentPassword);
+  await updatePassword(user, newPassword);
+}
+
+export async function firebaseDeleteAccount(currentPassword: string): Promise<void> {
+  const user = await reauthenticateWithPassword(currentPassword);
+  await deleteUser(user);
 }
 
 export function onAuthChanged(cb: (user: User | null) => void): () => void {
