@@ -22,6 +22,48 @@ const DAILY_TARGETS = {
   carbs: 190,
 };
 
+type GlycemicImpact = {
+  label: string;
+  modifier: 'none' | 'low' | 'medium' | 'high';
+  description: string;
+};
+
+/**
+ * Demonstracyjna, niezweryfikowana klasyfikacja wpływu na glikemię.
+ * Nie zastępuje interpretacji danych CGM ani porady medycznej.
+ */
+function estimateGlycemicImpact(carbs: number): GlycemicImpact {
+  if (carbs === 0) {
+    return {
+      label: 'Brak danych',
+      modifier: 'none',
+      description: 'Dodaj produkty, aby wyświetlić szacunkowy wpływ.',
+    };
+  }
+
+  if (carbs < 60) {
+    return {
+      label: 'Niski',
+      modifier: 'low',
+      description: 'Szacunkowy wpływ na podstawie zapisanych węglowodanów.',
+    };
+  }
+
+  if (carbs < 130) {
+    return {
+      label: 'Umiarkowany',
+      modifier: 'medium',
+      description: 'Szacunkowy wpływ na podstawie zapisanych węglowodanów.',
+    };
+  }
+
+  return {
+    label: 'Wysoki',
+    modifier: 'high',
+    description: 'Szacunkowy wpływ na podstawie zapisanych węglowodanów.',
+  };
+}
+
 function loadSavedMeals(): SavedMeals {
   const emptyMeals = createEmptySavedMeals();
 
@@ -58,7 +100,7 @@ function createEntryId(): string {
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-function formatNumber(value: number): string {
+function formatDecimal(value: number): string {
   return value.toLocaleString('pl-PL', {
     minimumFractionDigits: 1,
     maximumFractionDigits: 1,
@@ -105,10 +147,17 @@ export default function MealsPage() {
     );
   }, [savedMeals]);
 
-  const caloriesProgress = Math.min(
+  const carbsProgress = Math.min(
     100,
-    Math.round((totals.calories / DAILY_TARGETS.calories) * 100),
+    Math.round((totals.carbs / DAILY_TARGETS.carbs) * 100),
   );
+
+  const remainingCarbs = Math.max(
+    0,
+    DAILY_TARGETS.carbs - totals.carbs,
+  );
+
+  const glycemicImpact = estimateGlycemicImpact(totals.carbs);
 
   const selectedMeal = MEAL_SECTIONS.find(
     (meal) => meal.id === selectedMealId,
@@ -186,58 +235,81 @@ export default function MealsPage() {
         <div className="meals__balance-card">
           <div className="meals__balance-header">
             <div>
-              <h2>Dzisiejszy bilans</h2>
+              <h2>Dzisiejsze spożycie</h2>
               <p className="meals__date">{formatDate()}</p>
             </div>
 
-            <div className="meals__calories">
-              <strong>{totals.calories.toLocaleString('pl-PL')}</strong>
-              <span>kcal</span>
+            <div className="meals__carbs-total">
+              <strong>{totals.carbs.toLocaleString('pl-PL')}</strong>
+              <span>g węglowodanów</span>
             </div>
           </div>
 
           <div
             className="meals__progress-track"
             role="progressbar"
-            aria-label="Dzisiejszy bilans kalorii"
+            aria-label="Dzienne spożycie węglowodanów"
             aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={caloriesProgress}
+            aria-valuemax={DAILY_TARGETS.carbs}
+            aria-valuenow={totals.carbs}
           >
             <div
               className="meals__progress-fill"
-              style={{ width: `${caloriesProgress}%` }}
+              style={{ width: `${carbsProgress}%` }}
             />
           </div>
+
+          <p className="meals__progress-description">
+            {totals.carbs.toLocaleString('pl-PL')} z{' '}
+            {DAILY_TARGETS.carbs.toLocaleString('pl-PL')} g węglowodanów
+          </p>
 
           <div className="meals__macro-grid">
             <div className="meals__macro-card meals__macro-card--ww">
               <span className="meals__macro-label">WW</span>
-              <strong>{formatNumber(totals.ww)}</strong>
-              <small>cel: {formatNumber(DAILY_TARGETS.ww)}</small>
+              <strong>{formatDecimal(totals.ww)}</strong>
+              <small>cel: {formatDecimal(DAILY_TARGETS.ww)}</small>
             </div>
 
             <div className="meals__macro-card meals__macro-card--wbt">
               <span className="meals__macro-label">WBT</span>
-              <strong>{formatNumber(totals.wbt)}</strong>
-              <small>cel: {formatNumber(DAILY_TARGETS.wbt)}</small>
+              <strong>{formatDecimal(totals.wbt)}</strong>
+              <small>cel: {formatDecimal(DAILY_TARGETS.wbt)}</small>
             </div>
 
-            <div className="meals__macro-card meals__macro-card--carbs">
-              <span className="meals__macro-label">Węgle</span>
+            <div className="meals__macro-card meals__macro-card--energy">
+              <span className="meals__macro-label">Energia</span>
               <strong>
-                {totals.carbs.toLocaleString('pl-PL')} <em>g</em>
+                {totals.calories.toLocaleString('pl-PL')}
+                <em> kcal</em>
               </strong>
-              <small>
-                pozostało:{' '}
-                {Math.max(
-                  0,
-                  DAILY_TARGETS.carbs - totals.carbs,
-                ).toLocaleString('pl-PL')}{' '}
-                g
-              </small>
+              <small>pozostało: {remainingCarbs} g</small>
             </div>
           </div>
+
+          <div
+            className={`meals__impact meals__impact--${glycemicImpact.modifier}`}
+          >
+            <div className="meals__impact-heading">
+              <span>Szacunkowy wpływ na glikemię</span>
+              <strong>{glycemicImpact.label}</strong>
+            </div>
+
+            <p>{glycemicImpact.description}</p>
+            <small>
+              Wartość orientacyjna — nie zastępuje pomiaru glikemii.
+            </small>
+          </div>
+
+          <p className="meals__legend">
+            <span>
+              <b>WW</b> — wymienniki węglowodanowe
+            </span>
+
+            <span>
+              <b>WBT</b> — wymienniki białkowo-tłuszczowe
+            </span>
+          </p>
         </div>
       </section>
 
@@ -321,8 +393,8 @@ export default function MealsPage() {
                         <strong>{product.name}</strong>
                         <small>
                           {product.portion} · {product.calories} kcal ·{' '}
-                          {formatNumber(product.ww)} WW ·{' '}
-                          {formatNumber(product.wbt)} WBT
+                          {formatDecimal(product.ww)} WW ·{' '}
+                          {formatDecimal(product.wbt)} WBT
                         </small>
                       </div>
 

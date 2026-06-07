@@ -45,7 +45,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--sp-4);
-  margin-bottom: var(--sp-5);
+  margin-bottom: var(--sp-4);
 }
 
 .meals__balance-card h2 {
@@ -63,31 +63,31 @@
   color: var(--text-secondary);
 }
 
-.meals__calories {
+.meals__carbs-total {
   display: flex;
-  align-items: baseline;
-  gap: 6px;
-  white-space: nowrap;
+  flex-direction: column;
+  align-items: flex-end;
   color: var(--color-primary-700);
+  text-align: right;
 }
 
-.meals__calories strong {
+.meals__carbs-total strong {
   font-family: var(--font-headline);
-  font-size: 32px;
+  font-size: 34px;
   font-weight: 800;
   line-height: 1;
 }
 
-.meals__calories span {
+.meals__carbs-total span {
+  margin-top: 3px;
   font-family: var(--font-headline);
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
 }
 
 .meals__progress-track {
   width: 100%;
   height: 11px;
-  margin-bottom: var(--sp-5);
   overflow: hidden;
   background: var(--color-neutral-100);
   border-radius: var(--r-pill);
@@ -100,6 +100,13 @@
   transition: width var(--dur-fast) var(--ease-out);
 }
 
+.meals__progress-description {
+  margin: 7px 0 var(--sp-5);
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: right;
+}
+
 .meals__macro-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -107,8 +114,8 @@
 }
 
 .meals__macro-card {
-  min-height: 100px;
-  padding: 14px 8px 12px;
+  min-height: 94px;
+  padding: 13px 8px 11px;
   border-radius: var(--r-sm);
   text-align: center;
 }
@@ -117,7 +124,7 @@
   display: block;
   margin-bottom: 8px;
   font-family: var(--font-headline);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -126,13 +133,13 @@
 .meals__macro-card strong {
   display: block;
   font-family: var(--font-headline);
-  font-size: 25px;
+  font-size: 23px;
   font-weight: 800;
   line-height: 1;
 }
 
 .meals__macro-card strong em {
-  font-size: 14px;
+  font-size: 11px;
   font-style: normal;
   font-weight: 700;
 }
@@ -140,7 +147,7 @@
 .meals__macro-card small {
   display: block;
   margin-top: 9px;
-  font-size: 10px;
+  font-size: 9px;
   color: var(--text-muted);
 }
 
@@ -154,9 +161,84 @@
   background: var(--color-tertiary-100);
 }
 
-.meals__macro-card--carbs {
+.meals__macro-card--energy {
   color: #b45309;
   background: #fff3e0;
+}
+
+.meals__impact {
+  margin-top: var(--sp-4);
+  padding: var(--sp-3);
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+}
+
+.meals__impact-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+
+.meals__impact-heading span {
+  font-family: var(--font-headline);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.meals__impact-heading strong {
+  font-family: var(--font-headline);
+  font-size: 13px;
+}
+
+.meals__impact p {
+  margin: 6px 0 0;
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.meals__impact small {
+  display: block;
+  margin-top: 4px;
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+.meals__impact--none {
+  background: var(--color-neutral-50);
+  border-color: var(--border-subtle);
+}
+
+.meals__impact--none .meals__impact-heading strong {
+  color: var(--text-muted);
+}
+
+.meals__impact--low {
+  background: #edf8ef;
+  border-color: #c8e6c9;
+}
+
+.meals__impact--low .meals__impact-heading strong {
+  color: #2e7d32;
+}
+
+.meals__impact--medium {
+  background: #fff8e1;
+  border-color: #ffe082;
+}
+
+.meals__impact--medium .meals__impact-heading strong {
+  color: #a15c00;
+}
+
+.meals__impact--high {
+  background: #ffebee;
+  border-color: #ffcdd2;
+}
+
+.meals__impact--high .meals__impact-heading strong {
+  color: #c62828;
 }
 
 .meals__legend {
@@ -379,15 +461,15 @@
   }
 
   .meals__balance-card h2 {
-    font-size: 20px;
+    font-size: 19px;
   }
 
-  .meals__calories strong {
+  .meals__carbs-total strong {
     font-size: 28px;
   }
 
-  .meals__calories span {
-    font-size: 12px;
+  .meals__carbs-total span {
+    font-size: 10px;
   }
 
   .meals__macro-grid {
@@ -395,19 +477,25 @@
   }
 
   .meals__macro-card {
-    min-height: 92px;
-    padding: 12px 6px 10px;
+    min-height: 88px;
+    padding: 11px 5px 9px;
   }
 
   .meals__macro-label {
-    font-size: 11px;
+    font-size: 10px;
   }
 
   .meals__macro-card strong {
-    font-size: 22px;
+    font-size: 20px;
   }
 
   .meals__macro-card small {
-    font-size: 9px;
+    font-size: 8px;
+  }
+
+  .meals__impact-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 3px;
   }
 }
