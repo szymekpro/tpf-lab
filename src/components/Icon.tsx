@@ -23,6 +23,10 @@ const paths = {
   database:  'M12 3c4.4 0 8 1.1 8 2.5v13c0 1.4-3.6 2.5-8 2.5s-8-1.1-8-2.5v-13C4 4.1 7.6 3 12 3zm8 6.5c0 1.4-3.6 2.5-8 2.5S4 10.9 4 9.5m16 4c0 1.4-3.6 2.5-8 2.5S4 14.9 4 13.5',
   trash:     'M3 6h18M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2',
   shieldCheck: 'M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5l-8-3zm-1.5 8.5 2 2 4-4',
+  globe:     'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 0c2.2 2.4 3.3 5.4 3.3 9S14.2 18.6 12 21m0-18c-2.2 2.4-3.3 5.4-3.3 9s1.1 6.6 3.3 9M3.6 9h16.8M3.6 15h16.8',
+  moon:      'M21 13.2A7.7 7.7 0 1 1 10.8 3a6 6 0 0 0 10.2 10.2Z',
+  sync:      'M20 6v5h-5M4 18v-5h5M18.2 11A6.7 6.7 0 0 0 6.7 6.7L4 9.2m2 3.8a6.7 6.7 0 0 0 11.5 4.3L20 14.8',
+  info:      'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Zm0-6v-4m0-4h.01',
 } as const;
 
 export type IconName = keyof typeof paths;
@@ -36,6 +40,7 @@ type Props = Omit<SVGProps<SVGSVGElement>, 'name'> & {
 const STROKE_ICONS: ReadonlySet<IconName> = new Set([
   'arrowRight', 'trend', 'signal', 'fork', 'plus', 'bell', 'search',
   'settings', 'edit', 'logout', 'bluetooth', 'key', 'database', 'trash', 'shieldCheck',
+  'globe', 'moon', 'sync', 'info',
 ]);
 
 export function Icon({ name, size = 20, variant, ...rest }: Props) {

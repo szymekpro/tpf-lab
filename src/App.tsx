@@ -7,6 +7,7 @@ import { AccountView } from './features/account/AccountView';
 import { SensorStatusView } from './features/sensor/SensorStatusView';
 import { GlycemiaTargetEditView } from './features/account/GlycemiaTargetEditView';
 import { PrivacyView } from './features/account/PrivacyView';
+import { AppSettingsView } from './features/account/AppSettingsView';
 import MealsPage from './features/meals/MealsPage';
 import { GlycemiaView } from './features/glycemia/GlycemiaView';
 import { ReportsView } from './features/reports/ReportsView';
@@ -74,6 +75,14 @@ function App() {
     setDetail(null);
   }
 
+  function handleAccountDeleted() {
+    setUser(null);
+    setActive('home');
+    setDetail(null);
+    setGlycemiaView('main');
+    setAuthScreen('login');
+  }
+
   if (detail === 'sensor') {
     return (
       <AppShell active={active} onChange={(r) => { setActive(r); setDetail(null); }}>
@@ -93,7 +102,7 @@ function App() {
   if (detail === 'privacy') {
     return (
       <AppShell active={active} onChange={(r) => { setActive(r); setDetail(null); }}>
-        <PrivacyView onBack={() => setDetail(null)} />
+        <PrivacyView onBack={() => setDetail(null)} onAccountDeleted={handleAccountDeleted} />
       </AppShell>
     );
   }
@@ -106,6 +115,14 @@ function App() {
     );
   }
 
+  if (detail === 'app-settings') {
+    return (
+      <AppShell active={active} onChange={(r) => { setActive(r); setDetail(null); }}>
+        <AppSettingsView onBack={() => setDetail(null)} />
+      </AppShell>
+    );
+  }
+
   const ctx = { user, onNavigate: (r: DetailRoute) => setDetail(r) };
 
   const content = (() => {
@@ -113,7 +130,7 @@ function App() {
       case 'home':
         return <DashboardView ctx={ctx} />;
       case 'account':
-        return <AccountView user={user} onLogout={handleLogout} onEditTarget={() => setDetail('edit-target')} onPrivacy={() => setDetail('privacy')} onAlarms={() => setDetail('alarms')} />;
+        return <AccountView user={user} onLogout={handleLogout} onEditTarget={() => setDetail('edit-target')} onPrivacy={() => setDetail('privacy')} onAlarms={() => setDetail('alarms')} onSettings={() => setDetail('app-settings')} />;
       case 'glycemia':
         if (glycemiaView === 'reports') {
           return <ReportsView onBack={() => setGlycemiaView('main')} />;

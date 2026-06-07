@@ -4,13 +4,16 @@ import './index.css'
 import App from './App.tsx'
 import { UnitProvider } from './contexts/UnitContext.tsx'
 import { GlycemiaTargetProvider } from './contexts/GlycemiaTargetContext.tsx'
+import { ThemeProvider } from './contexts/ThemeProvider.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <UnitProvider>
-      <GlycemiaTargetProvider>
-        <App />
-      </GlycemiaTargetProvider>
-    </UnitProvider>
+    <ThemeProvider>
+      <UnitProvider>
+        <GlycemiaTargetProvider>
+          <App />
+        </GlycemiaTargetProvider>
+      </UnitProvider>
+    </ThemeProvider>
   </StrictMode>,
 )

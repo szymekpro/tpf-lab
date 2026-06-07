@@ -21,9 +21,6 @@
 .glycemia__rangeScroll {
   display: flex;
   gap: var(--sp-2);
-  overflow-x: auto;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
   padding-bottom: 2px;
 }
 
@@ -32,8 +29,9 @@
 }
 
 .glycemia__pill {
-  flex-shrink: 0;
-  padding: var(--sp-2) var(--sp-4);
+  flex: 1 1 0;
+  text-align: center;
+  padding: var(--sp-2) var(--sp-3);
   border-radius: var(--r-pill);
   border: 0;
   cursor: pointer;
