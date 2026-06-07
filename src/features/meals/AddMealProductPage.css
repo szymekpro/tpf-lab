@@ -3,42 +3,44 @@
   flex-direction: column;
   gap: var(--sp-5);
   padding: var(--sp-5);
-  padding-bottom: calc(92px + var(--sp-6));
+  padding-bottom: calc(72px + var(--sp-6));
 }
 
 .add-product__heading {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--sp-3);
 }
 
 .add-product__heading h1 {
   margin: 0;
-  font-family: var(--font-headline);
   font-size: var(--fs-h1);
   font-weight: 800;
   color: var(--text-primary);
 }
 
 .add-product__heading p {
-  margin: 2px 0 0;
+  margin: var(--sp-1) 0 0;
   font-size: var(--fs-small);
   color: var(--text-secondary);
 }
 
 .add-product__back {
   display: grid;
+  flex: 0 0 40px;
   width: 40px;
   height: 40px;
+  margin-top: 1px;
   place-items: center;
   padding: 0;
-  font-size: 25px;
+  font-size: var(--fs-h2);
   line-height: 1;
   color: var(--color-primary-700);
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--r-pill);
   cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out);
 }
 
 .add-product__back:hover {
@@ -64,6 +66,7 @@
 .add-product__search input {
   width: 100%;
   padding: 0;
+  font: inherit;
   font-size: var(--fs-body);
   color: var(--text-primary);
   background: transparent;
@@ -82,8 +85,8 @@
 }
 
 .add-product__filter {
-  padding: 9px 15px;
-  font-family: var(--font-headline);
+  padding: var(--sp-2) var(--sp-4);
+  font: inherit;
   font-size: var(--fs-small);
   font-weight: 700;
   color: var(--text-secondary);
@@ -91,6 +94,10 @@
   border: 1px solid var(--color-neutral-300);
   border-radius: var(--r-pill);
   cursor: pointer;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
 }
 
 .add-product__filter:hover {
@@ -117,9 +124,8 @@
 .add-product__section h2,
 .add-product__selected h2 {
   margin: 0;
-  font-family: var(--font-headline);
   font-size: var(--fs-h2);
-  font-weight: 700;
+  font-weight: 800;
   color: var(--color-primary-700);
 }
 
@@ -137,34 +143,34 @@
   padding: var(--sp-4);
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--r-md);
+  border-radius: var(--r-lg);
   box-shadow: var(--shadow-sm);
 }
 
 .add-product__eyebrow {
   display: block;
-  margin-bottom: 7px;
-  font-size: 11px;
+  margin-bottom: var(--sp-2);
+  font-size: var(--fs-small);
   font-weight: 700;
   color: var(--color-tertiary-700);
 }
 
 .add-product__frequent-card h3 {
   margin: 0;
-  font-family: var(--font-headline);
   font-size: var(--fs-body);
   font-weight: 700;
   color: var(--text-primary);
 }
 
 .add-product__frequent-card p {
-  margin: 2px 0 14px;
+  margin: var(--sp-1) 0 var(--sp-3);
   font-size: var(--fs-small);
   color: var(--text-muted);
 }
 
 .add-product__frequent-card strong {
   font-size: var(--fs-small);
+  font-weight: 700;
   color: var(--text-primary);
 }
 
@@ -177,13 +183,16 @@
   color: var(--color-primary-700);
   background: var(--color-primary-100);
   border: 0;
-  border-radius: var(--r-sm);
   cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
 }
 
 .add-product__plus {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-sm);
 }
 
 .add-product__row-plus {
@@ -221,7 +230,7 @@
   padding: var(--sp-3);
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--r-md);
+  border-radius: var(--r-lg);
   box-shadow: var(--shadow-sm);
 }
 
@@ -248,8 +257,7 @@
 
 .add-product__product-info strong {
   overflow: hidden;
-  font-family: var(--font-headline);
-  font-size: 14px;
+  font-size: var(--fs-body);
   font-weight: 700;
   color: var(--text-primary);
   text-overflow: ellipsis;
@@ -257,21 +265,22 @@
 }
 
 .add-product__product-info small {
-  margin-top: 2px;
-  font-size: 10px;
+  margin-top: var(--sp-1);
+  font-size: var(--fs-small);
   color: var(--text-muted);
 }
 
 .add-product__badges {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
-  margin-top: 5px;
+  gap: var(--sp-1);
+  margin-top: var(--sp-2);
 }
 
 .add-product__badges span {
   padding: 3px 7px;
-  font-size: 9px;
+  font-size: 10px;
+  font-weight: 700;
   color: var(--color-primary-700);
   background: var(--color-primary-100);
   border-radius: 4px;
@@ -284,8 +293,7 @@
 
 .add-product__product-calories {
   flex: 0 0 auto;
-  font-family: var(--font-headline);
-  font-size: 13px;
+  font-size: var(--fs-small);
   font-weight: 700;
   color: var(--color-primary-700);
 }
@@ -297,7 +305,7 @@
   text-align: center;
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--r-md);
+  border-radius: var(--r-lg);
 }
 
 .add-product__selected {
@@ -307,7 +315,7 @@
   padding: var(--sp-4);
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--r-md);
+  border-radius: var(--r-lg);
   box-shadow: var(--shadow-sm);
 }
 
@@ -333,14 +341,14 @@
 }
 
 .add-product__selected-row strong {
-  font-family: var(--font-headline);
-  font-size: 14px;
+  font-size: var(--fs-body);
+  font-weight: 700;
   color: var(--text-primary);
 }
 
 .add-product__selected-row small {
-  margin-top: 3px;
-  font-size: 11px;
+  margin-top: var(--sp-1);
+  font-size: var(--fs-small);
   color: var(--text-muted);
 }
 
@@ -364,7 +372,7 @@
 .add-product__save {
   width: 100%;
   padding: 13px var(--sp-4);
-  font-family: var(--font-headline);
+  font: inherit;
   font-size: var(--fs-body);
   font-weight: 700;
   color: var(--text-inverse);
@@ -372,6 +380,7 @@
   border: 0;
   border-radius: var(--r-md);
   cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out);
 }
 
 .add-product__save:hover {
@@ -384,11 +393,12 @@
     padding-left: var(--sp-4);
   }
 
-  .add-product__product-calories {
-    font-size: 11px;
-  }
-
   .add-product__product-row {
     gap: var(--sp-2);
+  }
+
+  .add-product__product-info small,
+  .add-product__product-calories {
+    font-size: 11px;
   }
 }
