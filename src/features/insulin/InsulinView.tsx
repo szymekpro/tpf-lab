@@ -1,51 +1,156 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { Icon } from '../../components';
+import { api } from '../../mocks';
+import type {
+  AccountProfile,
+  DashboardStats,
+  GlycemiaSnapshot,
+} from '../../mocks';
+import type { BolusMealData } from '../meals/MealsTypes';
 import './InsulinView.css';
 
-const CURRENT_GLUCOSE = 142;
-const ACTIVE_INSULIN = 1.8;
-const TARGET_GLUCOSE = 110;
-const SENSITIVITY_FACTOR = 25; // ile mg/dL zbija 1j insuliny
-const WW_FACTOR = 0.6; // dawka na 1 WW
-const WBT_FACTOR = 0.4; // dawka na 1 WBT
+type Props = {
+  mealData: BolusMealData | null;
+  onGoToMeals: () => void;
+};
 
-function formatUnit(value: number) {
-  return value.toFixed(1);
+function formatNumber(value: number): string {
+  return value.toLocaleString('pl-PL', {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
 }
 
-function clampMin(value: number, min = 0) {
+function clampMin(value: number, min = 0): number {
   return value < min ? min : value;
 }
 
-export function InsulinView() {
-  const [search, setSearch] = useState('');
-  const [ww, setWw] = useState(4.5);
-  const [wbt, setWbt] = useState(1.2);
+function roundToHalf(value: number): number {
+  return Math.round(value * 2) / 2;
+}
 
-  const mealDose = useMemo(() => {
-    return ww * WW_FACTOR + wbt * WBT_FACTOR;
-  }, [ww, wbt]);
+function parseIcrGramsPerUnit(icr: string | undefined): number {
+  if (!icr) {
+    return 10;
+  }
 
-  const correctionDose = useMemo(() => {
-    return Math.max(0, (CURRENT_GLUCOSE - TARGET_GLUCOSE) / SENSITIVITY_FACTOR);
+  const parts = icr.split(':');
+  const grams = Number(parts.at(-1));
+
+  return Number.isFinite(grams) && grams > 0 ? grams : 10;
+}
+
+export function InsulinView({ mealData, onGoToMeals }: Props) {
+  const [glycemia, setGlycemia] =
+    useState<GlycemiaSnapshot | null>(null);
+
+  const [profile, setProfile] =
+    useState<AccountProfile | null>(null);
+
+  const [stats, setStats] =
+    useState<DashboardStats | null>(null);
+
+  const [ww, setWw] = useState(() => mealData?.ww ?? 0);
+  const [wbt, setWbt] = useState(() => mealData?.wbt ?? 0);
+  const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let alive = true;
+
+    Promise.all([
+      api.getCurrentGlycemia(),
+      api.getAccountProfile(),
+      api.getDashboardStats(),
+    ])
+      .then(([currentGlycemia, accountProfile, dashboardStats]) => {
+        if (!alive) {
+          return;
+        }
+
+        setGlycemia(currentGlycemia);
+        setProfile(accountProfile);
+        setStats(dashboardStats);
+      })
+      .finally(() => {
+        if (alive) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      alive = false;
+    };
   }, []);
 
-  const suggestedDose = useMemo(() => {
-    return mealDose + correctionDose;
-  }, [mealDose, correctionDose]);
+  const calculation = useMemo(() => {
+    const currentGlycemia = glycemia?.value ?? 0;
+    const activeInsulin = stats?.iob ?? 0;
+    const isf = profile?.clinical.isf ?? 40;
+    const targetMin = profile?.clinical.targetMin ?? 70;
+    const targetMax = profile?.clinical.targetMax ?? 180;
+
+    const targetGlycemia = Math.round(
+      (targetMin + targetMax) / 2,
+    );
+
+    const icrGramsPerUnit = parseIcrGramsPerUnit(
+      profile?.clinical.icr,
+    );
+
+    const carbsAfterManualAdjustment = ww * 10;
+
+    const mealDose =
+      carbsAfterManualAdjustment / icrGramsPerUnit;
+
+    const correctionDose =
+      currentGlycemia > targetGlycemia
+        ? (currentGlycemia - targetGlycemia) / isf
+        : 0;
+
+    const suggestedDose = roundToHalf(
+      Math.max(
+        0,
+        mealDose + correctionDose - activeInsulin,
+      ),
+    );
+
+    return {
+      activeInsulin,
+      correctionDose,
+      mealDose,
+      suggestedDose,
+    };
+  }, [
+    glycemia?.value,
+    profile,
+    stats?.iob,
+    ww,
+  ]);
 
   function changeWw(delta: number) {
-    setWw((prev) => clampMin(Number((prev + delta).toFixed(1))));
+    setWw((current) =>
+      clampMin(
+        Number((current + delta).toFixed(1)),
+      ),
+    );
   }
 
   function changeWbt(delta: number) {
-    setWbt((prev) => clampMin(Number((prev + delta).toFixed(1))));
+    setWbt((current) =>
+      clampMin(
+        Number((current + delta).toFixed(1)),
+      ),
+    );
   }
 
-  function handleSave() {
-    alert(
-      `Zapisano dawkę ${formatUnit(suggestedDose)} j\n\n` +
-        `Posiłkowy: ${formatUnit(mealDose)} j\n` +
-        `Korekcyjny: ${formatUnit(correctionDose)} j`
+  if (loading) {
+    return (
+      <section className="insulin">
+        <p className="insulin__loading">
+          Ładowanie kalkulatora…
+        </p>
+      </section>
     );
   }
 
@@ -53,96 +158,195 @@ export function InsulinView() {
     <section className="insulin">
       <header className="insulin__header">
         <h1>Kalkulator bolusa</h1>
+
+        <p>
+          Symulacja obliczenia dawki na podstawie wybranego posiłku.
+        </p>
       </header>
 
-      <section className="insulin__card">
-        <p className="insulin__eyebrow">Aktualna glikemia</p>
-        <div className="insulin__glucoseRow">
-          <strong>{CURRENT_GLUCOSE}</strong>
-          <span>mg/dL</span>
-        </div>
-      </section>
+      {!mealData ? (
+        <section className="insulin__empty-card">
+          <div className="insulin__empty-icon">
+            <Icon name="fork" size={26} />
+          </div>
 
-      <section className="insulin__activeCard">
-        <div className="insulin__activeIcon">⚕</div>
-        <p>
-          Aktywna insulina: <strong>{formatUnit(ACTIVE_INSULIN)}j</strong>
-        </p>
-      </section>
+          <h2>Nie wybrano posiłku</h2>
 
-      <section className="insulin__card">
-        <p className="insulin__eyebrow">Dane posiłku</p>
+          <p>
+            Przejdź do zakładki Posiłki, dodaj produkty i wybierz opcję
+            „Oblicz bolus dla tego posiłku”.
+          </p>
 
-        <label className="insulin__search">
-          <span className="insulin__searchIcon">⌕</span>
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Wyszukaj produkt lub potrawę..."
-          />
-        </label>
+          <button type="button" onClick={onGoToMeals}>
+            Przejdź do posiłków
+            <Icon name="arrowRight" size={17} />
+          </button>
+        </section>
+      ) : (
+        <>
+          <section className="insulin__meal-card">
+            <div>
+              <p className="insulin__eyebrow">
+                Wybrany posiłek
+              </p>
 
-        <div className="insulin__counters">
-          <div className="insulin__counterBox">
-            <span className="insulin__counterLabel">Wymienniki WW</span>
+              <h2>{mealData.mealName}</h2>
 
-            <div className="insulin__stepper">
-              <button type="button" onClick={() => changeWw(-0.5)}>
-                −
-              </button>
-
-              <strong>{formatUnit(ww)}</strong>
-
-              <button type="button" onClick={() => changeWw(0.5)}>
-                +
-              </button>
+              <small>
+                {mealData.products.length}{' '}
+                {mealData.products.length === 1
+                  ? 'produkt'
+                  : 'produkty'}{' '}
+                · {mealData.carbs.toLocaleString('pl-PL')} g węglowodanów ·{' '}
+                {mealData.calories} kcal
+              </small>
             </div>
-          </div>
 
-          <div className="insulin__counterBox">
-            <span className="insulin__counterLabel">Wymienniki WBT</span>
+            <button type="button" onClick={onGoToMeals}>
+              Zmień
+            </button>
+          </section>
 
-            <div className="insulin__stepper">
-              <button type="button" onClick={() => changeWbt(-0.1)}>
-                −
-              </button>
+          <section className="insulin__card">
+            <p className="insulin__eyebrow">
+              Aktualna glikemia
+            </p>
 
-              <strong>{formatUnit(wbt)}</strong>
-
-              <button type="button" onClick={() => changeWbt(0.1)}>
-                +
-              </button>
+            <div className="insulin__glucose-row">
+              <strong>{glycemia?.value ?? '—'}</strong>
+              <span>mg/dL</span>
             </div>
-          </div>
-        </div>
-      </section>
+          </section>
 
-      <section className="insulin__doseCard">
-        <p className="insulin__doseTitle">Sugerowana dawka</p>
+          <section className="insulin__active-card">
+            <Icon name="syringe" size={19} />
 
-        <div className="insulin__doseValue">
-          <strong>{formatUnit(suggestedDose)}</strong>
-          <span>j</span>
-        </div>
+            <p>
+              Aktywna insulina:{' '}
+              <strong>
+                {formatNumber(calculation.activeInsulin)} j
+              </strong>
+            </p>
+          </section>
 
-        <div className="insulin__doseDetails">
-          <div>
-            <span>posiłkowy:</span>
-            <strong>{formatUnit(mealDose)}j</strong>
-          </div>
+          <section className="insulin__card">
+            <p className="insulin__eyebrow">
+              Dane posiłku
+            </p>
 
-          <div>
-            <span>korekcyjny:</span>
-            <strong>{formatUnit(correctionDose)}j</strong>
-          </div>
-        </div>
-      </section>
+            <p className="insulin__description">
+              Wartości zostały pobrane z zapisanego posiłku. Możesz
+              skorygować je ręcznie przed wykonaniem symulacji.
+            </p>
 
-      <button className="insulin__saveButton" type="button" onClick={handleSave}>
-        <span className="insulin__saveIcon">✓</span>
-        Zapisz i podaj
-      </button>
+            <div className="insulin__counters">
+              <div className="insulin__counter-box">
+                <span className="insulin__counter-label">
+                  Wymienniki WW
+                </span>
+
+                <div className="insulin__stepper">
+                  <button
+                    type="button"
+                    onClick={() => changeWw(-0.1)}
+                    aria-label="Zmniejsz WW"
+                  >
+                    −
+                  </button>
+
+                  <strong>{formatNumber(ww)}</strong>
+
+                  <button
+                    type="button"
+                    onClick={() => changeWw(0.1)}
+                    aria-label="Zwiększ WW"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              <div className="insulin__counter-box">
+                <span className="insulin__counter-label">
+                  Wymienniki WBT
+                </span>
+
+                <div className="insulin__stepper">
+                  <button
+                    type="button"
+                    onClick={() => changeWbt(-0.1)}
+                    aria-label="Zmniejsz WBT"
+                  >
+                    −
+                  </button>
+
+                  <strong>{formatNumber(wbt)}</strong>
+
+                  <button
+                    type="button"
+                    onClick={() => changeWbt(0.1)}
+                    aria-label="Zwiększ WBT"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="insulin__dose-card">
+            <p className="insulin__dose-title">
+              Symulowana dawka
+            </p>
+
+            <div className="insulin__dose-value">
+              <strong>
+                {formatNumber(calculation.suggestedDose)}
+              </strong>
+
+              <span>j</span>
+            </div>
+
+            <div className="insulin__dose-details">
+              <div>
+                <span>posiłkowy:</span>
+
+                <strong>
+                  {formatNumber(calculation.mealDose)} j
+                </strong>
+              </div>
+
+              <div>
+                <span>korekcyjny:</span>
+
+                <strong>
+                  {formatNumber(calculation.correctionDose)} j
+                </strong>
+              </div>
+
+              <div>
+                <span>aktywna insulina:</span>
+
+                <strong>
+                  − {formatNumber(calculation.activeInsulin)} j
+                </strong>
+              </div>
+            </div>
+          </section>
+
+          <button
+            className="insulin__save-button"
+            type="button"
+            onClick={() => setSaved(true)}
+          >
+            <Icon name="shieldCheck" size={18} />
+
+            {saved
+              ? 'Symulacja została zapisana'
+              : 'Zapisz symulację'}
+          </button>
+        </>
+      )}
     </section>
   );
 }
