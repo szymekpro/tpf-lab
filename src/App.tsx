@@ -73,6 +73,14 @@ function App() {
     setDetail(null);
   }
 
+  function handleAccountDeleted() {
+    setUser(null);
+    setActive('home');
+    setDetail(null);
+    setGlycemiaView('main');
+    setAuthScreen('login');
+  }
+
   if (detail === 'sensor') {
     return (
       <AppShell active={active} onChange={(r) => { setActive(r); setDetail(null); }}>
@@ -92,7 +100,7 @@ function App() {
   if (detail === 'privacy') {
     return (
       <AppShell active={active} onChange={(r) => { setActive(r); setDetail(null); }}>
-        <PrivacyView onBack={() => setDetail(null)} />
+        <PrivacyView onBack={() => setDetail(null)} onAccountDeleted={handleAccountDeleted} />
       </AppShell>
     );
   }

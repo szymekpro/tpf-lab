@@ -162,6 +162,39 @@
 .privacyList__chevron {
   color: #94a3b8;
   flex-shrink: 0;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.privacyList__chevron--open {
+  transform: rotate(90deg);
+}
+
+.privacySecurityForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  margin-top: var(--sp-2);
+  padding: var(--sp-4);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-md);
+  box-shadow: 0 4px 6px rgba(8, 126, 139, 0.08);
+}
+
+.privacySecurityForm__error,
+.privacyDelete__error {
+  font-size: var(--fs-small);
+  color: var(--color-danger-500);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.privacySecurityForm__success {
+  font-size: var(--fs-small);
+  color: var(--color-tertiary-500);
+  font-weight: 600;
+  line-height: 1.5;
+  margin: 0;
 }
 
 .privacyDelete {
@@ -239,6 +272,12 @@
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
+}
+
+.privacyDelete__cancel:disabled,
+.privacyDelete__confirm:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .privacyDelete__cancel {
