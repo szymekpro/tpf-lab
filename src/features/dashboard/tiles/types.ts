@@ -1,7 +1,7 @@
 import type { ComponentType } from 'react';
 import type { User } from '../../../mocks';
 
-export type DetailRoute = 'sensor' | 'edit-target' | 'privacy' | 'alarms';
+export type DetailRoute = 'sensor' | 'edit-target' | 'privacy' | 'alarms' | 'app-settings';
 
 export type TileContext = {
   user: User;
