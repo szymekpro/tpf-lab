@@ -134,6 +134,41 @@ export default function AddMealProductPage({
         </button>
       </div>
 
+      {selectedProducts.length > 0 && (
+        <section className="add-product__selected">
+          <h2>Wybrane produkty</h2>
+
+          <div className="add-product__selected-list">
+            {selectedProducts.map((product) => (
+              <div className="add-product__selected-row" key={product.id}>
+                <div>
+                  <strong>{product.name}</strong>
+                  <small>
+                    {product.portion} · {product.calories} kcal
+                  </small>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => removeProduct(product.id)}
+                  aria-label={`Usuń produkt: ${product.name}`}
+                >
+                  <Icon name="trash" size={18} />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <button
+            className="add-product__save"
+            type="button"
+            onClick={handleSave}
+          >
+            Zapisz posiłek ({selectedProducts.length})
+          </button>
+        </section>
+      )}
+
       {frequentlySelected.length > 0 && (
         <section className="add-product__section">
           <h2>Często wybierane</h2>
@@ -176,41 +211,6 @@ export default function AddMealProductPage({
         <div className="add-product__empty">
           Nie znaleziono produktu pasującego do wyszukiwania.
         </div>
-      )}
-
-      {selectedProducts.length > 0 && (
-        <section className="add-product__selected">
-          <h2>Wybrane produkty</h2>
-
-          <div className="add-product__selected-list">
-            {selectedProducts.map((product) => (
-              <div className="add-product__selected-row" key={product.id}>
-                <div>
-                  <strong>{product.name}</strong>
-                  <small>
-                    {product.portion} · {product.calories} kcal
-                  </small>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => removeProduct(product.id)}
-                  aria-label={`Usuń produkt: ${product.name}`}
-                >
-                  <Icon name="trash" size={18} />
-                </button>
-              </div>
-            ))}
-          </div>
-
-          <button
-            className="add-product__save"
-            type="button"
-            onClick={handleSave}
-          >
-            Zapisz posiłek ({selectedProducts.length})
-          </button>
-        </section>
       )}
     </section>
   );

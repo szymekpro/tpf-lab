@@ -384,3 +384,89 @@
   color: var(--text-primary);
   line-height: 1.5;
 }
+
+.sensorDialog__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-5);
+  z-index: 50;
+}
+
+.sensorDialog {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  background: var(--bg-surface);
+  border-radius: var(--r-md);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+  padding: var(--sp-6) var(--sp-5) var(--sp-5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--sp-3);
+}
+
+.sensorDialog__close {
+  position: absolute;
+  top: var(--sp-3);
+  right: var(--sp-3);
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--color-neutral-100);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sensorDialog__spinner {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 4px solid var(--color-neutral-100);
+  border-top-color: var(--color-primary-500);
+  animation: sensorDialogSpin 0.9s linear infinite;
+}
+
+@keyframes sensorDialogSpin {
+  to { transform: rotate(360deg); }
+}
+
+.sensorDialog__title {
+  font-family: var(--font-headline);
+  font-size: var(--fs-h3, 18px);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.sensorDialog__desc {
+  font-size: var(--fs-small);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.sensorDialog__cancel {
+  margin-top: var(--sp-2);
+  padding: var(--sp-2) var(--sp-5);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-pill);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-family: var(--font-headline);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  cursor: pointer;
+}
+.sensorDialog__cancel:hover {
+  background: var(--color-neutral-100);
+}
