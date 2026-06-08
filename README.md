@@ -1,82 +1,272 @@
-# DiabetCare — Frontend
+# DiabetCare
 
-Aplikacja webowa typu CGM (Continuous Glucose Monitoring) do zarządzania cukrzycą. Wyłącznie frontend — backend jest w pełni zamockowany.
+Aplikacja webowa typu **CGM** (Continuous Glucose Monitoring) wspierająca codzienne zarządzanie cukrzycą: podgląd bieżącej glikemii, analiza trendów, raporty AGP w formacie PDF, liczenie posiłków (WW/WBT), kalkulator bolusa insuliny oraz konfiguracja alarmów. Frontend jest w pełni funkcjonalny, dane CGM pochodzą z realistycznego mocka, a logowanie zrealizowano w oparciu o **Firebase Authentication**.
+
+Projekt odwzorowuje prototyp z Figmy: [TPF — Figma](https://www.figma.com/design/5KlJyivi0BxUVi4iVKdcy6/TPF).
+
+---
+
+## Spis treści
+
+- [Stos technologiczny](#stos-technologiczny)
+- [Uruchomienie lokalne](#uruchomienie-lokalne)
+- [Zmienne środowiskowe](#zmienne-środowiskowe)
+- [Routing — wszystkie ekrany](#routing--wszystkie-ekrany)
+- [Struktura projektu](#struktura-projektu)
+- [Komponenty reużywalne](#komponenty-reużywalne)
+- [Logowanie (Firebase Authentication)](#logowanie-firebase-authentication)
+- [Google Analytics](#google-analytics)
+- [Hotjar](#hotjar)
+- [Warstwa danych (mock CGM)](#warstwa-danych-mock-cgm)
+- [Deploy](#deploy)
+- [Zrzuty ekranu aplikacji](#zrzuty-ekranu-aplikacji)
+- [Zrzuty ekranu — Google Analytics](#zrzuty-ekranu--google-analytics)
+- [Zrzuty ekranu — Hotjar](#zrzuty-ekranu--hotjar)
+- [Mapowanie wymagań na realizację](#mapowanie-wymagań-na-realizację)
+
+---
 
 ## Stos technologiczny
 
 | Warstwa | Technologia |
 |---|---|
-| Framework | React 18 + TypeScript |
-| Bundler | Vite |
-| Style | CSS Modules (plain CSS z design tokenami) |
-| Czcionki | Outfit (nagłówki), Manrope (treść) — Google Fonts |
-| Ikony | Inline SVG (własny komponent `Icon`) |
+| Framework | React 19 + TypeScript |
+| Bundler | Vite 8 |
+| Routing | `react-router-dom` 7 (`BrowserRouter`) |
+| Autoryzacja | Firebase Authentication (Email/Password) |
+| Analityka zdarzeń | Google Analytics (Firebase Analytics) |
+| Analiza zachowań | Hotjar |
+| Style | Czyste CSS z design tokenami, pliki per-feature |
+| Czcionki | Outfit, Manrope z Google Fonts |
+| Ikony | Inline SVG |
+| Dane CGM | Mock z pliku `public/cgm-data.csv` (skrypt w Pythonie) |
 
-## Uruchomienie
+---
+
+## Uruchomienie lokalne
 
 ```bash
 npm install
 npm run dev
 ```
 
-Aplikacja działa na `http://localhost:5173`.
+---
 
-## Logowanie (mock)
+## Zmienne środowiskowe
 
-Backend nie istnieje — API jest w pełni zasymulowane przez pliki w `src/mocks/`.
-Sesja przechowywana w `sessionStorage` (kasowana po zamknięciu przeglądarki).
+Konfiguracja Firebase jest wczytywana z `import.meta.env`. Utwórz plik `.env.local` w katalogu głównym:
 
-| Login | Hasło |
-|---|---|
-| `admin` | `admin` |
-| `anna.kowalska@example.com` | `admin` |
+```env
+VITE_FIREBASE_API_KEY=...
+VITE_FIREBASE_AUTH_DOMAIN=...
+VITE_FIREBASE_PROJECT_ID=...
+VITE_FIREBASE_STORAGE_BUCKET=...
+VITE_FIREBASE_MESSAGING_SENDER_ID=...
+VITE_FIREBASE_APP_ID=...
+VITE_FIREBASE_MEASUREMENT_ID=...   # włącza Google Analytics (GA4)
+```
+
+> Bez `VITE_FIREBASE_MEASUREMENT_ID` warstwa analityki cicho się wyłącza (aplikacja działa normalnie, ale nie wysyła zdarzeń do GA).
+
+---
+
+## Routing — wszystkie ekrany
+
+Routing oparty o `react-router-dom`. Nawigacja między ekranami odbywa się **bez przeładowania strony**. Trasy są chronione: niezalogowany użytkownik ma dostęp wyłącznie do ekranów autoryzacji, a próba wejścia gdziekolwiek indziej przekierowuje na `/login`. Istnieje fallback dla nieistniejących ścieżek (`*`).
+
+### Trasy publiczne
+
+| Ścieżka | Ekran | Opis |
+|---|---|---|
+| `/login` | Logowanie | Formularz e-mail + hasło |
+| `/register` | Rejestracja | Tworzenie konta |
+| `/forgot-password` | Reset hasła | Wysyłka e-maila resetującego |
+| `*` | — | Przekierowanie na `/login` |
+
+### Trasy chronione
+
+| Ścieżka | Ekran | Opis |
+|---|---|---|
+| `/` | Główny (Dashboard) | Bieżąca glikemia, wykres 3h/12h/24h, TIR/GMI/IOB |
+| `/sensor` | Status sensora | Stan, kalibracja, historia, parowanie |
+| `/glycemia` | Glikemia | Analiza trendów 24h/7d/14d/30d, ostatnie pomiary |
+| `/glycemia/reports` | Raporty | Statystyki + profil AGP, generowanie PDF |
+| `/meals` | Posiłki | Bilans WW/WBT, dodawanie produktów |
+| `/insulin` | Insulina | Kalkulator bolusa na podstawie posiłku |
+| `/account` | Konto | Profil, parametry kliniczne, preferencje |
+| `/account/target` | Cel glikemii | Edycja zakresu docelowego |
+| `/account/privacy` | Prywatność | Zmiana hasła, usunięcie konta |
+| `/account/alarms` | Alarmy | Progi alarmów, historia zdarzeń |
+| `/account/settings` | Ustawienia | Jednostki, motyw, preferencje aplikacji |
+| `*` | — | Przekierowanie na `/` |
+
+---
 
 ## Struktura projektu
 
+Ekrany (strony związane z routingiem) znajdują się w `src/features/<obszar>/`. Każdy obszar funkcjonalny ma własny komponent-ekran oraz dedykowany plik CSS. Współdzielone elementy UI są w `src/components/`.
+
 ```
 src/
-├── components/          # Komponenty UI (Button, Card, Icon, Input)
-├── design-system/       # Tokeny projektowe (kolory, spacing, promienie)
-├── features/
-│   ├── login/           # Ekran logowania
-│   ├── dashboard/       # Ekran główny (kafelki: glikemia, statystyki, wykres)
-│   │   └── tiles/       # Rejestr kafelków dashboardu
-│   ├── account/         # Profil użytkownika + parametry kliniczne
-│   └── placeholder/     # Widok zastępczy dla niezaimplementowanych zakładek
+├── components/            # Reużywalne komponenty UI (Button, Card, Icon, Input)
+├── contexts/             # Konteksty globalne (jednostka, cel glikemii, motyw)
+├── design-system/        # Tokeny projektowe (kolory, spacing, promienie)
 ├── layouts/
-│   └── AppShell.tsx     # Nawigacja dolna + nagłówek aplikacji
-├── mocks/               # Zamockowane API
-│   ├── api.ts           # Funkcje api.login(), api.getCurrentUser() itp.
-│   └── types.ts         # Typy danych
-└── index.css            # Globalne CSS i design tokeny (zmienne CSS)
+│   └── AppShell.tsx      # Wspólny layout: nagłówek + dolna nawigacja
+├── lib/
+│   ├── firebase.ts       # initializeApp + getAuth
+│   ├── auth.ts           # Logowanie/rejestracja/reset/wylogowanie + reauth
+│   └── analytics.ts      # Google Analytics (GA4) — trackEvent / trackScreen
+├── features/             # Ekrany aplikacji (pełne widoki = "pages")
+│   ├── login/            # LoginView, RegisterView, ForgotPasswordView
+│   ├── dashboard/        # DashboardView + kafelki (tiles/)
+│   ├── glycemia/         # GlycemiaView (analiza trendów)
+│   ├── reports/          # ReportsView + generator PDF (reportDocument.ts)
+│   ├── meals/            # MealsPage, AddMealProductPage
+│   ├── insulin/          # InsulinView (kalkulator bolusa)
+│   ├── alarms/           # AlarmsView (progi + historia)
+│   ├── sensor/           # SensorStatusView (kalibracja, parowanie)
+│   └── account/          # AccountView, PrivacyView, AppSettingsView, GlycemiaTargetEditView
+├── mocks/                # Zamockowane API + przetwarzanie danych CGM
+│   ├── api.ts            # api.getGlycemiaChart(), api.getReportData() itd.
+│   ├── cgmData.ts        # Loader CSV, statystyki, AGP, alarmy
+│   └── types.ts          # Typy danych
+├── App.tsx               # Definicje tras (Routes/Route) + ochrona tras + GA
+├── main.tsx              # BrowserRouter + providery kontekstów
+└── index.css             # Globalne CSS i design tokeny
+
+public/
+└── cgm-data.csv          # Mock realnych pomiarów CGM (30 dni co 5 min)
+
+scripts/
+└── generate_cgm_csv.py   # Generator realistycznych danych CGM
+
+docs/
+└── screenshots/          # Zrzuty ekranu do dokumentacji
 ```
 
-## Widoki aplikacji
+---
 
-| Zakładka | Status | Opis |
+## Komponenty reużywalne
+
+Powtarzalne elementy UI wydzielono do `src/components/` i są używane w wielu ekranach, przyjmując propsy:
+
+| Komponent | Propsy (wybrane) | Użycie |
 |---|---|---|
-| Główny | ✅ Zaimplementowany | Bieżąca glikemia, TIR/GMI/IOB, wykres 24h |
-| Glikemia | 🔧 Placeholder | Historia pomiarów (w przygotowaniu) |
-| Posiłki | 🔧 Placeholder | Kalkulator posiłków (w przygotowaniu) |
-| Insulina | 🔧 Placeholder | Kalkulator bolusa (w przygotowaniu) |
-| Konto | ✅ Zaimplementowany | Profil, parametry kliniczne, preferencje |
+| `Button` | `variant`, `fullWidth`, `iconLeft`, `onClick` | Akcje w formularzach, CTA |
+| `Card` | `title`, `tone`, `padded`, `className` | Kafelki dashboardu, sekcje |
+| `Icon` | `name`, `size`, `style` | Spójny zestaw ikon SVG w całej aplikacji |
+| `Input` | `label`, `type`, `value`, `onChange` | Pola formularzy logowania/rejestracji |
 
-## Mock API — dostępne funkcje
+Dodatkowo dashboard korzysta z systemu **kafelków** (`features/dashboard/tiles/`) z rejestrem i wspólnym interfejsem `TileDefinition`, co pozwala dokładać/porządkować kafelki deklaratywnie.
 
-```ts
-api.login(email, password)       // Logowanie — walidacja credentials
-api.getCurrentUser()             // Zwraca zalogowanego użytkownika lub rzuca błąd
-api.logout()                     // Kasuje sesję
-api.getCurrentGlycemia()         // Aktualny odczyt CGM
-api.getGlycemia24h()             // Dane wykresu 24h
-api.getDashboardStats()          // Statystyki: TIR, GMI, IOB
-api.getAccountProfile()          // Profil + parametry kliniczne
+---
+
+## Google Analytics
+
+Zintegrowane przez `firebase/analytics`. Ponieważ routing nie przeładowuje strony, **odsłony (screen_view) są wysyłane przy każdej zmianie trasy** — w `App.tsx` nasłuchiwana jest zmiana `location.pathname`, a `trackScreen()` raportuje nazwę ekranu.
+
+Śledzone są również zdarzenia biznesowe: `login`, `sign_up`, `password_reset_request`, `change_password`, `delete_account_success`, `logout`. Implementacja: `src/lib/analytics.ts`.
+
+---
+
+## Hotjar
+
+Snippet śledzący zachowania użytkowników (Hotjar / Contentsquare) jest ładowany globalnie w `index.html`, dzięki czemu działa na wszystkich trasach:
+
+```html
+<script src="https://t.contentsquare.net/uxa/dcc98fb7e9769.js"></script>
 ```
 
-## Design
+---
 
-Projekt bazuje na makietach Figma. Tokeny kolorystyczne:
+## Warstwa danych (mock CGM)
 
-- **Primary** — teal `#087E8B` (główny kolor akcji)
-- **Tertiary** — zielony `#2E7D32` (strefa docelowa glikemii)
-- **Neutral** — szarości od `#F8F9FA` do `#1A1F24`
+Dane glikemii pochodzą z pliku `public/cgm-data.csv` (30 dni, próbki co 5 min), wygenerowanego skryptem `scripts/generate_cgm_csv.py`. Skrypt symuluje realistyczny profil osoby z cukrzycą (TIR ~85%, epizody hipo- i hiperglikemii). Moduł `src/mocks/cgmData.ts` ładuje CSV i liczy statystyki (TIR, GMI, profil AGP, zdarzenia alarmowe), a `src/mocks/api.ts` wystawia asynchroniczne API zbliżone do realnego backendu.
+
+Preferencje użytkownika, takie jak jednostka, zakres docelowy, progi alarmów, motyw, bieżąca glikemia z kalibracji są utrwalane w `localStorage`.
+
+---
+
+## Deploy
+
+Aplikacja to statyczny build SPA (`npm run build` → `dist/`). W repozytorium znajdują się gotowe konfiguracje przekierowań dla SPA:
+
+- **Vercel** — `vercel.json` (rewrite wszystkich ścieżek na `/index.html`)
+- **Netlify** — `public/_redirects` (`/* /index.html 200`)
+
+Przekierowania są niezbędne, aby odświeżenie strony na trasie innej niż `/` (np. `/account/alarms`) działało poprawnie przy routingu po stronie klienta.
+
+> 🔗 **Adres produkcyjny:** 
+
+---
+
+## Zrzuty ekranu aplikacji
+
+### Główny (Dashboard) — `/`
+Bieżąca glikemia z trendem, przełączany wykres 3h/12h/24h (punkty kolorowane wg stref docelowych) oraz kafelki TIR / GMI / IOB.
+
+![Ekran główny aplikacji: bieżąca glikemia, wykres trendu i statystyki TIR/GMI/IOB](docs/screenshots/main-screen.png)
+
+### Glikemia — `/glycemia`
+Analiza trendów dla zakresów 24h / 7 dni / 14 dni / 30 dni, czas w celu (TIR) oraz lista ostatnich pomiarów z doładowywaniem i zwijaniem.
+
+![Ekran glikemii: analiza trendów dla wybranego zakresu czasu i ostatnie pomiary](docs/screenshots/glycemia.png)
+
+### Raporty — `/glycemia/reports`
+Statystyki wyrównania i dynamiczny profil AGP liczony z danych CSV dla wybranego okresu; przycisk generowania raportu PDF.
+
+![Ekran raportów: statystyki i profil dobowy AGP z opcją eksportu do PDF](docs/screenshots/reports.png)
+
+### Posiłki — `/meals`
+Bilans węglowodanowy (WW/WBT) i energetyczny posiłku, lista produktów oraz przejście do kalkulatora bolusa.
+
+![Ekran posiłków: bilans WW/WBT i lista dodanych produktów](docs/screenshots/meals.png)
+
+### Insulina — `/insulin`
+Kalkulator dawki bolusa na podstawie wybranego posiłku i parametrów klinicznych użytkownika.
+
+![Ekran insuliny: kalkulator dawki bolusa na podstawie posiłku](docs/screenshots/insulin.png)
+
+### Alarmy — `/account/alarms`
+Niezależne progi alarmu niskiego/wysokiego (suwaki), test alarmu z dźwiękiem oraz historia zdarzeń generowana z danych CGM, z limitem i doładowywaniem.
+
+![Ekran alarmów: konfiguracja progów i historia zdarzeń alarmowych](docs/screenshots/alarms.png)
+
+### Konto — `/account`
+Profil użytkownika, parametry kliniczne, wejścia do ustawień (cel glikemii, prywatność, alarmy, ustawienia aplikacji) i wylogowanie.
+
+![Ekran konta: profil użytkownika i ustawienia aplikacji](docs/screenshots/account.png)
+
+---
+
+## Zrzuty ekranu — Google Analytics
+
+> 🔧 **Do uzupełnienia.** Wstaw zrzuty z panelu Google Analytics (GA4) potwierdzające zbieranie danych, np. raport Realtime oraz zdarzenia `screen_view` / `login`. Zapisz pliki w `docs/screenshots/` i odkomentuj odwołania poniżej.
+
+<!--
+![Google Analytics — raport Realtime z aktywnymi użytkownikami](docs/screenshots/ga-realtime.png)
+![Google Analytics — lista zdarzeń (screen_view, login, sign_up)](docs/screenshots/ga-events.png)
+-->
+
+_[ miejsce na zrzut: GA4 — Realtime ]_
+
+_[ miejsce na zrzut: GA4 — Zdarzenia ]_
+
+---
+
+## Zrzuty ekranu — Hotjar
+
+> 🔧 **Do uzupełnienia.** Wstaw zrzuty z panelu Hotjar, np. nagrania sesji (Recordings) oraz mapę cieplną (Heatmap) wybranego ekranu. Zapisz pliki w `docs/screenshots/` i odkomentuj odwołania poniżej.
+
+<!--
+![Hotjar — lista nagrań sesji](docs/screenshots/hotjar-recordings.png)
+![Hotjar — mapa cieplna ekranu głównego](docs/screenshots/hotjar-heatmap.png)
+-->
+
+_[ miejsce na zrzut: Hotjar — Recordings ]_
+
+_[ miejsce na zrzut: Hotjar — Heatmap ]_
+
+---
+
