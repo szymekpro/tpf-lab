@@ -47,6 +47,7 @@
 
 .shell__navItem {
   display: flex;
+  width: 100%;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -61,6 +62,7 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  text-decoration: none;
   border-radius: var(--r-md);
   transition: color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
 }

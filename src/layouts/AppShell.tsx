@@ -1,10 +1,19 @@
 import type { ReactNode } from 'react';
+import { NavLink } from 'react-router-dom';
 import { Icon, type IconName } from '../components';
 import './AppShell.css';
 
 export type AppRoute = 'home' | 'glycemia' | 'meals' | 'insulin' | 'account';
 
 type NavItem = { id: AppRoute; label: string; icon: IconName };
+
+const APP_ROUTE_PATHS: Record<AppRoute, string> = {
+  home:     '/',
+  glycemia: '/glycemia',
+  meals:    '/meals',
+  insulin:  '/insulin',
+  account:  '/account',
+};
 
 const NAV: ReadonlyArray<NavItem> = [
   { id: 'home',     label: 'Główny',    icon: 'home' },
@@ -16,11 +25,10 @@ const NAV: ReadonlyArray<NavItem> = [
 
 type Props = {
   active: AppRoute;
-  onChange: (r: AppRoute) => void;
   children: ReactNode;
 };
 
-export function AppShell({ active, onChange, children }: Props) {
+export function AppShell({ active, children }: Props) {
   return (
     <div className="shell">
       <header className="shell__top">
@@ -33,16 +41,15 @@ export function AppShell({ active, onChange, children }: Props) {
         {NAV.map(item => {
           const isActive = item.id === active;
           return (
-            <button
+            <NavLink
               key={item.id}
-              type="button"
+              to={APP_ROUTE_PATHS[item.id]}
               className={`shell__navItem ${isActive ? 'shell__navItem--active' : ''}`}
-              onClick={() => onChange(item.id)}
               aria-current={isActive ? 'page' : undefined}
             >
               <Icon name={item.icon} size={22} />
               <span>{item.label}</span>
-            </button>
+            </NavLink>
           );
         })}
       </nav>

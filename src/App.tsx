@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { AppShell, type AppRoute } from './layouts/AppShell';
 import { DashboardView } from './features/dashboard/DashboardView';
 import { LoginView } from './features/login/LoginView';
@@ -20,17 +21,9 @@ import { firebaseLogout, onAuthChanged } from './lib/auth';
 import { trackEvent, trackScreen } from './lib/analytics';
 import type { DetailRoute } from './features/dashboard/tiles/types';
 
-type AuthScreen = 'login' | 'register' | 'forgot';
-
 type ScreenAnalytics = {
   key: string;
   title: string;
-};
-
-const AUTH_SCREEN_ANALYTICS: Record<AuthScreen, ScreenAnalytics> = {
-  login:    { key: 'auth_login', title: 'Logowanie' },
-  register: { key: 'auth_register', title: 'Rejestracja' },
-  forgot:   { key: 'auth_forgot', title: 'Reset hasła' },
 };
 
 const APP_ROUTE_ANALYTICS: Record<AppRoute, ScreenAnalytics> = {
@@ -41,41 +34,58 @@ const APP_ROUTE_ANALYTICS: Record<AppRoute, ScreenAnalytics> = {
   account:  { key: 'account', title: 'Konto' },
 };
 
-const DETAIL_ROUTE_ANALYTICS: Record<DetailRoute, ScreenAnalytics> = {
-  sensor:         { key: 'sensor_status', title: 'Status sensora' },
-  'edit-target':  { key: 'edit_glycemia_target', title: 'Cel glikemii' },
-  privacy:        { key: 'privacy_security', title: 'Prywatność i bezpieczeństwo' },
-  alarms:         { key: 'alarms', title: 'Powiadomienia i alarmy' },
-  'app-settings': { key: 'app_settings', title: 'Ustawienia aplikacji' },
+const DETAIL_ROUTE_PATHS: Record<DetailRoute, string> = {
+  sensor:         '/sensor',
+  'edit-target':  '/account/target',
+  privacy:        '/account/privacy',
+  alarms:         '/account/alarms',
+  'app-settings': '/account/settings',
 };
 
-function getScreenAnalytics(
-  user: User | null,
-  authScreen: AuthScreen,
-  active: AppRoute,
-  detail: DetailRoute | null,
-  glycemiaView: 'main' | 'reports',
-): ScreenAnalytics {
-  if (!user) return AUTH_SCREEN_ANALYTICS[authScreen];
-  if (detail) return DETAIL_ROUTE_ANALYTICS[detail];
-  if (active === 'glycemia' && glycemiaView === 'reports') {
+const DETAIL_PATH_ANALYTICS: Record<string, ScreenAnalytics> = {
+  '/sensor':           { key: 'sensor_status', title: 'Status sensora' },
+  '/account/target':   { key: 'edit_glycemia_target', title: 'Cel glikemii' },
+  '/account/privacy':  { key: 'privacy_security', title: 'Prywatność i bezpieczeństwo' },
+  '/account/alarms':   { key: 'alarms', title: 'Powiadomienia i alarmy' },
+  '/account/settings': { key: 'app_settings', title: 'Ustawienia aplikacji' },
+};
+
+function isAuthPath(pathname: string): boolean {
+  return pathname === '/login'
+    || pathname === '/register'
+    || pathname === '/forgot-password';
+}
+
+function getAuthScreenAnalytics(pathname: string): ScreenAnalytics {
+  switch (pathname) {
+    case '/register':
+      return { key: 'auth_register', title: 'Rejestracja' };
+    case '/forgot-password':
+      return { key: 'auth_forgot', title: 'Reset hasła' };
+    default:
+      return { key: 'auth_login', title: 'Logowanie' };
+  }
+}
+
+function getActiveRoute(pathname: string): AppRoute {
+  if (pathname.startsWith('/glycemia')) return 'glycemia';
+  if (pathname.startsWith('/meals')) return 'meals';
+  if (pathname.startsWith('/insulin')) return 'insulin';
+  if (pathname.startsWith('/account')) return 'account';
+  return 'home';
+}
+
+function getScreenAnalytics(pathname: string, user: User | null): ScreenAnalytics {
+  if (!user) return getAuthScreenAnalytics(pathname);
+  if (pathname === '/glycemia/reports') {
     return { key: 'glycemia_reports', title: 'Raporty glikemii' };
   }
-  return APP_ROUTE_ANALYTICS[active];
+  return DETAIL_PATH_ANALYTICS[pathname] ?? APP_ROUTE_ANALYTICS[getActiveRoute(pathname)];
 }
 
 function App() {
-  const [active, setActive] =
-    useState<AppRoute>('home');
-
-  const [detail, setDetail] =
-    useState<DetailRoute | null>(null);
-
-  const [glycemiaView, setGlycemiaView] =
-    useState<'main' | 'reports'>('main');
-
-  const [authScreen, setAuthScreen] =
-    useState<'login' | 'register' | 'forgot'>('login');
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const [user, setUser] =
     useState<User | null>(null);
@@ -99,8 +109,11 @@ function App() {
 
   useEffect(() => {
     if (booting) return;
-    void trackScreen(getScreenAnalytics(user, authScreen, active, detail, glycemiaView));
-  }, [active, authScreen, booting, detail, glycemiaView, user]);
+    if (!user && !isAuthPath(location.pathname)) return;
+    if (user && isAuthPath(location.pathname)) return;
+
+    void trackScreen(getScreenAnalytics(location.pathname, user));
+  }, [booting, location.pathname, user]);
 
   if (booting) {
     return (
@@ -111,45 +124,56 @@ function App() {
   }
 
   if (!user) {
-    if (authScreen === 'register') {
-      return (
-        <RegisterView
-          onRegistered={(registeredUser) => {
-            setUser(registeredUser);
-            setActive('home');
-            setAuthScreen('login');
-          }}
-          onGoToLogin={() =>
-            setAuthScreen('login')
-          }
-        />
-      );
-    }
-
-    if (authScreen === 'forgot') {
-      return (
-        <ForgotPasswordView
-          onGoToLogin={() =>
-            setAuthScreen('login')
-          }
-        />
-      );
-    }
-
     return (
-      <LoginView
-        onLoggedIn={(loggedUser) => {
-          setUser(loggedUser);
-          setActive('home');
-        }}
-        onGoToRegister={() =>
-          setAuthScreen('register')
-        }
-        onForgotPassword={() =>
-          setAuthScreen('forgot')
-        }
-      />
+      <Routes>
+        <Route
+          path="/login"
+          element={(
+            <LoginView
+              onLoggedIn={(loggedUser) => {
+                setUser(loggedUser);
+                navigate('/', { replace: true });
+              }}
+              onGoToRegister={() =>
+                navigate('/register')
+              }
+              onForgotPassword={() =>
+                navigate('/forgot-password')
+              }
+            />
+          )}
+        />
+        <Route
+          path="/register"
+          element={(
+            <RegisterView
+              onRegistered={(registeredUser) => {
+                setUser(registeredUser);
+                navigate('/', { replace: true });
+              }}
+              onGoToLogin={() =>
+                navigate('/login')
+              }
+            />
+          )}
+        />
+        <Route
+          path="/forgot-password"
+          element={(
+            <ForgotPasswordView
+              onGoToLogin={() =>
+                navigate('/login')
+              }
+            />
+          )}
+        />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
     );
+  }
+
+  if (isAuthPath(location.pathname)) {
+    return <Navigate to="/" replace />;
   }
 
   async function handleLogout() {
@@ -157,173 +181,143 @@ function App() {
     void trackEvent('logout', { method: 'password' });
 
     setUser(null);
-    setActive('home');
-    setDetail(null);
     setBolusMeal(null);
-  }
-
-  function handleNavigation(route: AppRoute) {
-    setActive(route);
-    setDetail(null);
-    setGlycemiaView('main');
+    navigate('/login', { replace: true });
   }
 
   function handleCalculateBolus(
     mealData: BolusMealData,
   ) {
     setBolusMeal(mealData);
-    setDetail(null);
-    setActive('insulin');
-  }
-
-  if (detail === 'sensor') {
-    return (
-      <AppShell
-        active={active}
-        onChange={handleNavigation}
-      >
-        <SensorStatusView
-          onBack={() => setDetail(null)}
-        />
-      </AppShell>
-    );
-  }
-
-  if (detail === 'edit-target') {
-    return (
-      <AppShell
-        active={active}
-        onChange={handleNavigation}
-      >
-        <GlycemiaTargetEditView
-          onBack={() => setDetail(null)}
-        />
-      </AppShell>
-    );
-  }
-
-  if (detail === 'privacy') {
-    return (
-      <AppShell
-        active={active}
-        onChange={handleNavigation}
-      >
-        <PrivacyView
-          onBack={() => setDetail(null)}
-        />
-      </AppShell>
-    );
-  }
-
-  if (detail === 'alarms') {
-    return (
-      <AppShell
-        active={active}
-        onChange={handleNavigation}
-      >
-        <AlarmsView
-          onBack={() => setDetail(null)}
-        />
-      </AppShell>
-    );
-  }
-
-  if (detail === 'app-settings') {
-    return (
-      <AppShell
-        active={active}
-        onChange={handleNavigation}
-      >
-        <AppSettingsView
-          onBack={() => setDetail(null)}
-        />
-      </AppShell>
-    );
+    navigate('/insulin');
   }
 
   const ctx = {
     user,
     onNavigate: (route: DetailRoute) =>
-      setDetail(route),
+      navigate(DETAIL_ROUTE_PATHS[route]),
   };
 
-  const content = (() => {
-    switch (active) {
-      case 'home':
-        return <DashboardView ctx={ctx} />;
-
-      case 'account':
-        return (
-          <AccountView
-            user={user}
-            onLogout={handleLogout}
-            onEditTarget={() =>
-              setDetail('edit-target')
-            }
-            onPrivacy={() =>
-              setDetail('privacy')
-            }
-            onAlarms={() =>
-              setDetail('alarms')
-            }
-            onSettings={() =>
-              setDetail('app-settings')
-            }
-          />
-        );
-
-      case 'glycemia':
-        if (glycemiaView === 'reports') {
-          return (
-            <ReportsView
-              onBack={() =>
-                setGlycemiaView('main')
-              }
-            />
-          );
-        }
-
-        return (
-          <GlycemiaView
-            onShowReports={() =>
-              setGlycemiaView('reports')
-            }
-          />
-        );
-
-      case 'meals':
-        return (
-          <MealsPage
-            onCalculateBolus={
-              handleCalculateBolus
-            }
-          />
-        );
-
-      case 'insulin':
-        return (
-          <InsulinView
-            key={
-              bolusMeal
-                ? `${bolusMeal.mealId}-${bolusMeal.ww}-${bolusMeal.wbt}-${bolusMeal.products.length}`
-                : 'empty'
-            }
-            mealData={bolusMeal}
-            onGoToMeals={() => setActive('meals')}
-          />
-        );
-
-      default:
-        return <DashboardView ctx={ctx} />;
-    }
-  })();
+  const active = getActiveRoute(location.pathname);
 
   return (
-    <AppShell
-      active={active}
-      onChange={handleNavigation}
-    >
-      {content}
+    <AppShell active={active}>
+      <Routes>
+        <Route path="/" element={<DashboardView ctx={ctx} />} />
+        <Route path="/home" element={<Navigate to="/" replace />} />
+        <Route
+          path="/sensor"
+          element={(
+            <SensorStatusView
+              onBack={() => navigate('/')}
+            />
+          )}
+        />
+        <Route
+          path="/glycemia"
+          element={(
+            <GlycemiaView
+              onShowReports={() =>
+                navigate('/glycemia/reports')
+              }
+            />
+          )}
+        />
+        <Route
+          path="/glycemia/reports"
+          element={(
+            <ReportsView
+              onBack={() =>
+                navigate('/glycemia')
+              }
+            />
+          )}
+        />
+        <Route
+          path="/meals"
+          element={(
+            <MealsPage
+              onCalculateBolus={
+                handleCalculateBolus
+              }
+            />
+          )}
+        />
+        <Route
+          path="/insulin"
+          element={(
+            <InsulinView
+              key={
+                bolusMeal
+                  ? `${bolusMeal.mealId}-${bolusMeal.ww}-${bolusMeal.wbt}-${bolusMeal.products.length}`
+                  : 'empty'
+              }
+              mealData={bolusMeal}
+              onGoToMeals={() =>
+                navigate('/meals')
+              }
+            />
+          )}
+        />
+        <Route
+          path="/account"
+          element={(
+            <AccountView
+              user={user}
+              onLogout={handleLogout}
+              onEditTarget={() =>
+                navigate('/account/target')
+              }
+              onPrivacy={() =>
+                navigate('/account/privacy')
+              }
+              onAlarms={() =>
+                navigate('/account/alarms')
+              }
+              onSettings={() =>
+                navigate('/account/settings')
+              }
+            />
+          )}
+        />
+        <Route
+          path="/account/target"
+          element={(
+            <GlycemiaTargetEditView
+              onBack={() => navigate('/account')}
+            />
+          )}
+        />
+        <Route
+          path="/account/privacy"
+          element={(
+            <PrivacyView
+              onBack={() => navigate('/account')}
+              onAccountDeleted={() => {
+                setUser(null);
+                navigate('/login', { replace: true });
+              }}
+            />
+          )}
+        />
+        <Route
+          path="/account/alarms"
+          element={(
+            <AlarmsView
+              onBack={() => navigate('/account')}
+            />
+          )}
+        />
+        <Route
+          path="/account/settings"
+          element={(
+            <AppSettingsView
+              onBack={() => navigate('/account')}
+            />
+          )}
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </AppShell>
   );
 }
