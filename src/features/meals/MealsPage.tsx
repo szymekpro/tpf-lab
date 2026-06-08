@@ -6,6 +6,7 @@ import {
   MEAL_SECTIONS,
 } from './MealsTypes';
 import type {
+  BolusMealData,
   MealId,
   Product,
   SavedMealProduct,
@@ -16,11 +17,52 @@ import './MealsPage.css';
 const STORAGE_KEY = 'diabetcare.saved-meals.v1';
 
 const DAILY_TARGETS = {
-  calories: 2100,
   ww: 18,
   wbt: 12,
   carbs: 190,
 };
+
+type GlycemicImpact = {
+  label: string;
+  modifier: 'none' | 'low' | 'medium' | 'high';
+  description: string;
+};
+
+type Props = {
+  onCalculateBolus: (mealData: BolusMealData) => void;
+};
+
+function estimateGlycemicImpact(carbs: number): GlycemicImpact {
+  if (carbs === 0) {
+    return {
+      label: 'Brak danych',
+      modifier: 'none',
+      description: 'Dodaj produkty, aby wyświetlić szacunkowy wpływ.',
+    };
+  }
+
+  if (carbs < 60) {
+    return {
+      label: 'Niski',
+      modifier: 'low',
+      description: 'Szacunkowy wpływ na podstawie zapisanych węglowodanów.',
+    };
+  }
+
+  if (carbs < 130) {
+    return {
+      label: 'Umiarkowany',
+      modifier: 'medium',
+      description: 'Szacunkowy wpływ na podstawie zapisanych węglowodanów.',
+    };
+  }
+
+  return {
+    label: 'Wysoki',
+    modifier: 'high',
+    description: 'Szacunkowy wpływ na podstawie zapisanych węglowodanów.',
+  };
+}
 
 function loadSavedMeals(): SavedMeals {
   const emptyMeals = createEmptySavedMeals();
@@ -75,9 +117,27 @@ function formatDate(): string {
   return formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
 }
 
-export default function MealsPage() {
+function calculateMealTotals(products: SavedMealProduct[]) {
+  return products.reduce(
+    (totals, product) => ({
+      calories: totals.calories + product.calories,
+      ww: totals.ww + product.ww,
+      wbt: totals.wbt + product.wbt,
+      carbs: totals.carbs + product.carbs,
+    }),
+    {
+      calories: 0,
+      ww: 0,
+      wbt: 0,
+      carbs: 0,
+    },
+  );
+}
+
+export default function MealsPage({ onCalculateBolus }: Props) {
   const [savedMeals, setSavedMeals] = useState<SavedMeals>(loadSavedMeals);
   const [selectedMealId, setSelectedMealId] = useState<MealId | null>(null);
+
   const [expandedMeals, setExpandedMeals] = useState<Set<MealId>>(
     () => new Set(),
   );
@@ -87,28 +147,16 @@ export default function MealsPage() {
   }, [savedMeals]);
 
   const totals = useMemo(() => {
-    const products = Object.values(savedMeals).flat();
-
-    return products.reduce(
-      (currentTotals, product) => ({
-        calories: currentTotals.calories + product.calories,
-        ww: currentTotals.ww + product.ww,
-        wbt: currentTotals.wbt + product.wbt,
-        carbs: currentTotals.carbs + product.carbs,
-      }),
-      {
-        calories: 0,
-        ww: 0,
-        wbt: 0,
-        carbs: 0,
-      },
-    );
+    return calculateMealTotals(Object.values(savedMeals).flat());
   }, [savedMeals]);
 
-  const caloriesProgress = Math.min(
+  const carbsProgress = Math.min(
     100,
-    Math.round((totals.calories / DAILY_TARGETS.calories) * 100),
+    Math.round((totals.carbs / DAILY_TARGETS.carbs) * 100),
   );
+
+  const remainingCarbs = Math.max(0, DAILY_TARGETS.carbs - totals.carbs);
+  const glycemicImpact = estimateGlycemicImpact(totals.carbs);
 
   const selectedMeal = MEAL_SECTIONS.find(
     (meal) => meal.id === selectedMealId,
@@ -164,6 +212,19 @@ export default function MealsPage() {
     }));
   }
 
+  function handleCalculateBolus(
+    mealId: MealId,
+    mealName: string,
+    products: SavedMealProduct[],
+  ) {
+    onCalculateBolus({
+      mealId,
+      mealName,
+      products,
+      ...calculateMealTotals(products),
+    });
+  }
+
   if (selectedMeal) {
     return (
       <AddMealProductPage
@@ -186,29 +247,34 @@ export default function MealsPage() {
         <div className="meals__balance-card">
           <div className="meals__balance-header">
             <div>
-              <h2>Dzisiejszy bilans</h2>
+              <h2>Dzisiejsze spożycie</h2>
               <p className="meals__date">{formatDate()}</p>
             </div>
 
-            <div className="meals__calories">
-              <strong>{totals.calories.toLocaleString('pl-PL')}</strong>
-              <span>kcal</span>
+            <div className="meals__carbs-total">
+              <strong>{totals.carbs.toLocaleString('pl-PL')}</strong>
+              <span>g węglowodanów</span>
             </div>
           </div>
 
           <div
             className="meals__progress-track"
             role="progressbar"
-            aria-label="Dzisiejszy bilans kalorii"
+            aria-label="Dzienne spożycie węglowodanów"
             aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={caloriesProgress}
+            aria-valuemax={DAILY_TARGETS.carbs}
+            aria-valuenow={totals.carbs}
           >
             <div
               className="meals__progress-fill"
-              style={{ width: `${caloriesProgress}%` }}
+              style={{ width: `${carbsProgress}%` }}
             />
           </div>
+
+          <p className="meals__progress-description">
+            {totals.carbs.toLocaleString('pl-PL')} z{' '}
+            {DAILY_TARGETS.carbs.toLocaleString('pl-PL')} g węglowodanów
+          </p>
 
           <div className="meals__macro-grid">
             <div className="meals__macro-card meals__macro-card--ww">
@@ -223,21 +289,38 @@ export default function MealsPage() {
               <small>cel: {formatNumber(DAILY_TARGETS.wbt)}</small>
             </div>
 
-            <div className="meals__macro-card meals__macro-card--carbs">
-              <span className="meals__macro-label">Węgle</span>
+            <div className="meals__macro-card meals__macro-card--energy">
+              <span className="meals__macro-label">Energia</span>
+
               <strong>
-                {totals.carbs.toLocaleString('pl-PL')} <em>g</em>
+                {totals.calories.toLocaleString('pl-PL')}
+                <em> kcal</em>
               </strong>
-              <small>
-                pozostało:{' '}
-                {Math.max(
-                  0,
-                  DAILY_TARGETS.carbs - totals.carbs,
-                ).toLocaleString('pl-PL')}{' '}
-                g
-              </small>
+
+              <small>pozostało: {remainingCarbs} g</small>
             </div>
           </div>
+
+          <div
+            className={`meals__impact meals__impact--${glycemicImpact.modifier}`}
+          >
+            <div className="meals__impact-heading">
+              <span>Szacunkowy wpływ na glikemię</span>
+              <strong>{glycemicImpact.label}</strong>
+            </div>
+
+            <p>{glycemicImpact.description}</p>
+          </div>
+
+          <p className="meals__legend">
+            <span>
+              <b>WW</b> — wymienniki węglowodanowe
+            </span>
+
+            <span>
+              <b>WBT</b> — wymienniki białkowo-tłuszczowe
+            </span>
+          </p>
         </div>
       </section>
 
@@ -245,10 +328,7 @@ export default function MealsPage() {
         {MEAL_SECTIONS.map((meal) => {
           const savedProducts = savedMeals[meal.id];
           const isExpanded = expandedMeals.has(meal.id);
-          const totalCalories = savedProducts.reduce(
-            (sum, product) => sum + product.calories,
-            0,
-          );
+          const mealTotals = calculateMealTotals(savedProducts);
 
           return (
             <article className="meals__group" key={meal.id}>
@@ -274,10 +354,9 @@ export default function MealsPage() {
                     {savedProducts.length > 0 && (
                       <small>
                         {savedProducts.length}{' '}
-                        {savedProducts.length === 1
-                          ? 'produkt'
-                          : 'produkty'}{' '}
-                        · {totalCalories} kcal
+                        {savedProducts.length === 1 ? 'produkt' : 'produkty'} ·{' '}
+                        {mealTotals.carbs.toLocaleString('pl-PL')} g węgli ·{' '}
+                        {mealTotals.calories} kcal
                       </small>
                     )}
                   </div>
@@ -319,6 +398,7 @@ export default function MealsPage() {
                     >
                       <div>
                         <strong>{product.name}</strong>
+
                         <small>
                           {product.portion} · {product.calories} kcal ·{' '}
                           {formatNumber(product.ww)} WW ·{' '}
@@ -337,6 +417,21 @@ export default function MealsPage() {
                       </button>
                     </div>
                   ))}
+
+                  <button
+                    className="meals__bolus-button"
+                    type="button"
+                    onClick={() =>
+                      handleCalculateBolus(
+                        meal.id,
+                        meal.name,
+                        savedProducts,
+                      )
+                    }
+                  >
+                    Oblicz bolus dla tego posiłku
+                    <Icon name="arrowRight" size={18} />
+                  </button>
                 </div>
               )}
             </article>

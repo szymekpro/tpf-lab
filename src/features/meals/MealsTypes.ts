@@ -41,37 +41,23 @@ export type MealSection = {
   tone: MealTone;
 };
 
+export type BolusMealData = {
+  mealId: MealId;
+  mealName: string;
+  products: SavedMealProduct[];
+  calories: number;
+  carbs: number;
+  ww: number;
+  wbt: number;
+};
+
 export const MEAL_SECTIONS: ReadonlyArray<MealSection> = [
-  {
-    id: 'breakfast',
-    name: 'Śniadanie',
-    tone: 'teal',
-  },
-  {
-    id: 'second-breakfast',
-    name: 'II Śniadanie',
-    tone: 'orange',
-  },
-  {
-    id: 'lunch',
-    name: 'Lunch',
-    tone: 'blue',
-  },
-  {
-    id: 'dinner',
-    name: 'Obiad',
-    tone: 'green',
-  },
-  {
-    id: 'snack',
-    name: 'Przekąska',
-    tone: 'pink',
-  },
-  {
-    id: 'supper',
-    name: 'Kolacja',
-    tone: 'cyan',
-  },
+  { id: 'breakfast', name: 'Śniadanie', tone: 'teal' },
+  { id: 'second-breakfast', name: 'II Śniadanie', tone: 'orange' },
+  { id: 'lunch', name: 'Lunch', tone: 'blue' },
+  { id: 'dinner', name: 'Obiad', tone: 'green' },
+  { id: 'snack', name: 'Przekąska', tone: 'pink' },
+  { id: 'supper', name: 'Kolacja', tone: 'cyan' },
 ];
 
 export const PRODUCTS: ReadonlyArray<Product> = [

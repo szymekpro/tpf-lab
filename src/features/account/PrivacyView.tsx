@@ -342,14 +342,6 @@ export function PrivacyView({ onBack, onAccountDeleted }: Props) {
                   </div>
                 )}
 
-                <button
-                  type="button"
-                  className={`privacyPanel__dangerAction ${twoFactorEnabled ? '' : 'privacyPanel__dangerAction--muted'}`}
-                  onClick={() => setTwoFactor(false)}
-                  disabled={!twoFactorEnabled}
-                >
-                  Wyłącz weryfikację
-                </button>
               </div>
             )}
           </li>

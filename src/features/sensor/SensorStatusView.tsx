@@ -32,6 +32,7 @@ export function SensorStatusView({ onBack }: Props) {
   const [calibValue, setCalibValue] = useState('');
   const [calibPending, setCalibPending] = useState(false);
   const [showAll, setShowAll] = useState(false);
+  const [pairingOpen, setPairingOpen] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -164,7 +165,7 @@ export function SensorStatusView({ onBack }: Props) {
               className="sensorSection__link"
               onClick={() => setShowAll(v => !v)}
             >
-              {showAll ? 'Zwiń historię' : 'Zobacz pełną historię!'}
+              {showAll ? 'Zwiń historię' : 'Zobacz pełną historię'}
             </button>
           )}
         </section>
@@ -188,12 +189,53 @@ export function SensorStatusView({ onBack }: Props) {
               <span className="sensorSteps__text">Poczekaj na komunikat o udanym połączeniu (ok. 5 minut).</span>
             </li>
           </ol>
-          <button type="button" className="sensorSection__link sensorSection__pairLink">
+          <button
+            type="button"
+            className="sensorSection__link sensorSection__pairLink"
+            onClick={() => setPairingOpen(true)}
+          >
             Rozpocznij nowe parowanie
           </button>
         </section>
 
       </div>
+
+      {pairingOpen && (
+        <div
+          className="sensorDialog__overlay"
+          role="presentation"
+          onClick={() => setPairingOpen(false)}
+        >
+          <div
+            className="sensorDialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="sensorDialog-title"
+            onClick={e => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="sensorDialog__close"
+              onClick={() => setPairingOpen(false)}
+              aria-label="Zamknij"
+            >
+              ✕
+            </button>
+            <div className="sensorDialog__spinner" aria-hidden="true" />
+            <h2 id="sensorDialog-title" className="sensorDialog__title">Wyszukiwanie sensora…</h2>
+            <p className="sensorDialog__desc">
+              Upewnij się, że Bluetooth jest włączony, a transmiter znajduje się blisko telefonu.
+            </p>
+            <button
+              type="button"
+              className="sensorDialog__cancel"
+              onClick={() => setPairingOpen(false)}
+            >
+              Anuluj
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
