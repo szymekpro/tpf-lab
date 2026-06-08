@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Button, Icon, Input, type IconName } from '../../components';
 import { firebaseChangePassword, firebaseDeleteAccount } from '../../lib/auth';
+import { trackEvent } from '../../lib/analytics';
 import './PrivacyView.css';
 
 type Props = {
@@ -127,6 +128,7 @@ export function PrivacyView({ onBack, onAccountDeleted }: Props) {
     }
 
     setDeletePending(true);
+    void trackEvent('delete_account_attempt', { method: 'password' });
     try {
       await firebaseDeleteAccount(deletePassword);
       onAccountDeleted?.();
@@ -144,19 +146,47 @@ export function PrivacyView({ onBack, onAccountDeleted }: Props) {
 
   function togglePanel(panel: PrivacyPanel) {
     setPasswordExpanded(false);
-    setExpandedPanel(current => current === panel ? null : panel);
+    setExpandedPanel(current => {
+      const next = current === panel ? null : panel;
+      if (next) {
+        void trackEvent('open_privacy_panel', { panel: next });
+      }
+      return next;
+    });
   }
 
   function togglePermission(key: PermissionKey) {
-    setPermissions(prev => ({ ...prev, [key]: !prev[key] }));
+    setPermissions(prev => {
+      const enabled = !prev[key];
+      void trackEvent('toggle_permission', { permission: key, enabled });
+      return { ...prev, [key]: enabled };
+    });
   }
 
   function toggleDataOption(key: DataToggleKey) {
-    setDataToggles(prev => ({ ...prev, [key]: !prev[key] }));
+    setDataToggles(prev => {
+      const enabled = !prev[key];
+      void trackEvent('toggle_data_option', { option: key, enabled });
+      return { ...prev, [key]: enabled };
+    });
     setDataNotice(null);
   }
 
-  function setMockDataNotice(message: string) {
+  function setTwoFactor(nextEnabled: boolean) {
+    setTwoFactorEnabled(nextEnabled);
+    void trackEvent('toggle_two_factor', { enabled: nextEnabled });
+  }
+
+  function toggleBackupCodes() {
+    setBackupCodesVisible(visible => {
+      const nextVisible = !visible;
+      void trackEvent(nextVisible ? 'show_backup_codes' : 'hide_backup_codes');
+      return nextVisible;
+    });
+  }
+
+  function setMockDataNotice(action: 'export_data' | 'clear_cache', message: string) {
+    void trackEvent(action, { source: 'privacy_data' });
     setDataNotice(message);
   }
 
@@ -288,7 +318,7 @@ export function PrivacyView({ onBack, onAccountDeleted }: Props) {
                     aria-checked={twoFactorEnabled}
                     aria-label="Dwuetapowa weryfikacja"
                     className={`privacySwitch ${twoFactorEnabled ? 'privacySwitch--on' : ''}`}
-                    onClick={() => setTwoFactorEnabled(enabled => !enabled)}
+                    onClick={() => setTwoFactor(!twoFactorEnabled)}
                   >
                     <span className="privacySwitch__knob" />
                   </button>
@@ -299,7 +329,7 @@ export function PrivacyView({ onBack, onAccountDeleted }: Props) {
                   <button
                     type="button"
                     className="privacyPanel__textButton"
-                    onClick={() => setBackupCodesVisible(visible => !visible)}
+                    onClick={toggleBackupCodes}
                   >
                     {backupCodesVisible ? 'Ukryj' : 'Pokaż'}
                   </button>
@@ -378,14 +408,14 @@ export function PrivacyView({ onBack, onAccountDeleted }: Props) {
                   <button
                     type="button"
                     className="privacyDataActions__button"
-                    onClick={() => setMockDataNotice('Eksport danych został przygotowany.')}
+                    onClick={() => setMockDataNotice('export_data', 'Eksport danych został przygotowany.')}
                   >
                     Eksportuj dane
                   </button>
                   <button
                     type="button"
                     className="privacyDataActions__button"
-                    onClick={() => setMockDataNotice('Lokalny cache został wyczyszczony.')}
+                    onClick={() => setMockDataNotice('clear_cache', 'Lokalny cache został wyczyszczony.')}
                   >
                     Wyczyść cache
                   </button>

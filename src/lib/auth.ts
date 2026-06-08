@@ -11,6 +11,7 @@ import {
   type User as FirebaseUser,
 } from 'firebase/auth';
 import { auth } from './firebase';
+import { trackEvent } from './analytics';
 import type { User } from '../mocks';
 
 type EmailFirebaseUser = FirebaseUser & { email: string };
@@ -28,16 +29,19 @@ function toAppUser(fb: FirebaseUser): User {
 
 export async function firebaseLogin(email: string, password: string): Promise<User> {
   const { user } = await signInWithEmailAndPassword(auth, email, password);
+  void trackEvent('login', { method: 'password' });
   return toAppUser(user);
 }
 
 export async function firebaseRegister(email: string, password: string): Promise<User> {
   const { user } = await createUserWithEmailAndPassword(auth, email, password);
+  void trackEvent('sign_up', { method: 'password' });
   return toAppUser(user);
 }
 
 export async function firebaseResetPassword(email: string): Promise<void> {
   await sendPasswordResetEmail(auth, email);
+  void trackEvent('password_reset_request', { method: 'email' });
 }
 
 export async function firebaseLogout(): Promise<void> {
@@ -65,11 +69,13 @@ export async function firebaseChangePassword(
 ): Promise<void> {
   const user = await reauthenticateWithPassword(currentPassword);
   await updatePassword(user, newPassword);
+  void trackEvent('change_password', { method: 'password' });
 }
 
 export async function firebaseDeleteAccount(currentPassword: string): Promise<void> {
   const user = await reauthenticateWithPassword(currentPassword);
   await deleteUser(user);
+  void trackEvent('delete_account_success', { method: 'password' });
 }
 
 export function onAuthChanged(cb: (user: User | null) => void): () => void {

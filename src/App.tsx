@@ -15,11 +15,53 @@ import { ForgotPasswordView } from './features/login/ForgotPasswordView';
 import { InsulinView } from './features/insulin/InsulinView';
 import type { BolusMealData } from './features/meals/MealsTypes';
 import type { User } from './mocks';
-import {
-  firebaseLogout,
-  onAuthChanged,
-} from './lib/auth';
+import { firebaseLogout, onAuthChanged } from './lib/auth';
+import { trackEvent, trackScreen } from './lib/analytics';
 import type { DetailRoute } from './features/dashboard/tiles/types';
+
+type AuthScreen = 'login' | 'register' | 'forgot';
+
+type ScreenAnalytics = {
+  key: string;
+  title: string;
+};
+
+const AUTH_SCREEN_ANALYTICS: Record<AuthScreen, ScreenAnalytics> = {
+  login:    { key: 'auth_login', title: 'Logowanie' },
+  register: { key: 'auth_register', title: 'Rejestracja' },
+  forgot:   { key: 'auth_forgot', title: 'Reset hasła' },
+};
+
+const APP_ROUTE_ANALYTICS: Record<AppRoute, ScreenAnalytics> = {
+  home:     { key: 'home', title: 'Główny' },
+  glycemia: { key: 'glycemia', title: 'Glikemia' },
+  meals:    { key: 'meals', title: 'Posiłki' },
+  insulin:  { key: 'insulin', title: 'Insulina' },
+  account:  { key: 'account', title: 'Konto' },
+};
+
+const DETAIL_ROUTE_ANALYTICS: Record<DetailRoute, ScreenAnalytics> = {
+  sensor:         { key: 'sensor_status', title: 'Status sensora' },
+  'edit-target':  { key: 'edit_glycemia_target', title: 'Cel glikemii' },
+  privacy:        { key: 'privacy_security', title: 'Prywatność i bezpieczeństwo' },
+  alarms:         { key: 'alarms', title: 'Powiadomienia i alarmy' },
+  'app-settings': { key: 'app_settings', title: 'Ustawienia aplikacji' },
+};
+
+function getScreenAnalytics(
+  user: User | null,
+  authScreen: AuthScreen,
+  active: AppRoute,
+  detail: DetailRoute | null,
+  glycemiaView: 'main' | 'reports',
+): ScreenAnalytics {
+  if (!user) return AUTH_SCREEN_ANALYTICS[authScreen];
+  if (detail) return DETAIL_ROUTE_ANALYTICS[detail];
+  if (active === 'glycemia' && glycemiaView === 'reports') {
+    return { key: 'glycemia_reports', title: 'Raporty glikemii' };
+  }
+  return APP_ROUTE_ANALYTICS[active];
+}
 
 function App() {
   const [active, setActive] =
@@ -53,6 +95,11 @@ function App() {
 
     return unsubscribe;
   }, []);
+
+  useEffect(() => {
+    if (booting) return;
+    void trackScreen(getScreenAnalytics(user, authScreen, active, detail, glycemiaView));
+  }, [active, authScreen, booting, detail, glycemiaView, user]);
 
   if (booting) {
     return (
@@ -106,6 +153,7 @@ function App() {
 
   async function handleLogout() {
     await firebaseLogout();
+    void trackEvent('logout', { method: 'password' });
 
     setUser(null);
     setActive('home');
