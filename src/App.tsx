@@ -6,6 +6,7 @@ import { AccountView } from './features/account/AccountView';
 import { SensorStatusView } from './features/sensor/SensorStatusView';
 import { GlycemiaTargetEditView } from './features/account/GlycemiaTargetEditView';
 import { PrivacyView } from './features/account/PrivacyView';
+import { AppSettingsView } from './features/account/AppSettingsView';
 import MealsPage from './features/meals/MealsPage';
 import { GlycemiaView } from './features/glycemia/GlycemiaView';
 import { ReportsView } from './features/reports/ReportsView';
@@ -227,6 +228,19 @@ function App() {
     );
   }
 
+  if (detail === 'app-settings') {
+    return (
+      <AppShell
+        active={active}
+        onChange={handleNavigation}
+      >
+        <AppSettingsView
+          onBack={() => setDetail(null)}
+        />
+      </AppShell>
+    );
+  }
+
   const ctx = {
     user,
     onNavigate: (route: DetailRoute) =>
@@ -251,6 +265,9 @@ function App() {
             }
             onAlarms={() =>
               setDetail('alarms')
+            }
+            onSettings={() =>
+              setDetail('app-settings')
             }
           />
         );
