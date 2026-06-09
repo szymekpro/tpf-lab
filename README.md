@@ -168,6 +168,8 @@ Zintegrowane przez `firebase/analytics`. Ponieważ routing nie przeładowuje str
 
 Śledzone są również zdarzenia biznesowe: `login`, `sign_up`, `password_reset_request`, `change_password`, `delete_account_success`, `logout`. Implementacja: `src/lib/analytics.ts`.
 
+Dodatkowo logowane są wybrane akcje w ustawieniach i prywatności, np. zmiana języka, trybu ciemnego, uprawnień oraz opcji synchronizacji. Do GA nie są wysyłane dane medyczne ani dane logowania użytkownika.
+
 ---
 
 ## Hotjar
@@ -177,6 +179,8 @@ Snippet śledzący zachowania użytkowników (Hotjar / Contentsquare) jest łado
 ```html
 <script src="https://t.contentsquare.net/uxa/dcc98fb7e9769.js"></script>
 ```
+
+Hotjar służy do analizy użyteczności interfejsu, np. nagrań sesji i map cieplnych. Przy wdrożeniu produkcyjnym wymagana jest zgoda użytkownika oraz maskowanie danych wrażliwych.
 
 ---
 
@@ -241,32 +245,14 @@ Profil użytkownika, parametry kliniczne, wejścia do ustawień (cel glikemii, p
 ---
 
 ## Zrzuty ekranu — Google Analytics
-
-> 🔧 **Do uzupełnienia.** Wstaw zrzuty z panelu Google Analytics (GA4) potwierdzające zbieranie danych, np. raport Realtime oraz zdarzenia `screen_view` / `login`. Zapisz pliki w `docs/screenshots/` i odkomentuj odwołania poniżej.
-
-<!--
-![Google Analytics — raport Realtime z aktywnymi użytkownikami](docs/screenshots/ga-realtime.png)
-![Google Analytics — lista zdarzeń (screen_view, login, sign_up)](docs/screenshots/ga-events.png)
--->
-
-_[ miejsce na zrzut: GA4 — Realtime ]_
-
-_[ miejsce na zrzut: GA4 — Zdarzenia ]_
+Statystyki aplikacji google analytics dashboard
+![Ekran GA Firebase: statystyki aplikacji google analytics dashboard](docs/screenshots/ga1.jpg)
 
 ---
 
 ## Zrzuty ekranu — Hotjar
-
-> 🔧 **Do uzupełnienia.** Wstaw zrzuty z panelu Hotjar, np. nagrania sesji (Recordings) oraz mapę cieplną (Heatmap) wybranego ekranu. Zapisz pliki w `docs/screenshots/` i odkomentuj odwołania poniżej.
-
-<!--
-![Hotjar — lista nagrań sesji](docs/screenshots/hotjar-recordings.png)
-![Hotjar — mapa cieplna ekranu głównego](docs/screenshots/hotjar-heatmap.png)
--->
-
-_[ miejsce na zrzut: Hotjar — Recordings ]_
-
-_[ miejsce na zrzut: Hotjar — Heatmap ]_
+Statystyki aplikacji LCP - Hotjar
+![Ekran hotjar: statystyki aplikacji LCP](docs/screenshots/hotjar.jpg)
 
 ---
 
